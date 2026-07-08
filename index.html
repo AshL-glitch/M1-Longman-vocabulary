@@ -1,0 +1,2206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M1 Mechanics & Longman 3000 双语智能词汇系统</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Microsoft YaHei', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              800: '#0c4a6e',
+              900: '#082f49',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Card Flip 3D Effect */
+    .perspective {
+      perspective: 1000px;
+    }
+    .preserve-3d {
+      transform-style: preserve-3d;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+    .transition-all-300 {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.03);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(14,165,233,0.3);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(14,165,233,0.5);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen font-sans transition-colors duration-300">
+
+  <!-- Main Wrapper -->
+  <div class="flex flex-col md:flex-row min-h-screen">
+    
+    <!-- Sidebar / Navigation -->
+    <aside class="w-full md:w-64 bg-white dark:bg-slate-950 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between shrink-0 z-20">
+      <div class="p-5">
+        <!-- Brand Title -->
+        <div class="flex items-center space-x-3 mb-5">
+          <div class="bg-gradient-to-tr from-sky-500 to-indigo-600 p-2.5 rounded-xl shadow-lg shadow-sky-500/20 text-white">
+            <i class="fa-solid fa-graduation-cap text-xl"></i>
+          </div>
+          <div>
+            <h1 id="brand-title" class="font-black text-sm leading-tight tracking-tight text-slate-900 dark:text-white">M1 & Longman Dual</h1>
+            <p id="brand-subtitle" class="text-xs text-slate-500 dark:text-slate-400 font-semibold">双语智能抗遗忘系统</p>
+          </div>
+        </div>
+
+        <!-- Library Switcher Panel -->
+        <div class="bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 mb-5 space-y-1.5">
+          <span class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-1.5">当前学习词库</span>
+          <button onclick="switchLibrary('m1')" id="lib-btn-m1" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-300 bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 shadow-sm border border-sky-100 dark:border-sky-950">
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-compass-drafting"></i> M1 机械力学词汇</span>
+            <i class="fa-solid fa-circle-check text-[10px]"></i>
+          </button>
+          <button onclick="switchLibrary('longman')" id="lib-btn-longman" class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-300 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/40">
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-book-open"></i> Longman 3000 高频词</span>
+            <i class="fa-solid fa-circle-check text-[10px] opacity-0"></i>
+          </button>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="space-y-1" id="nav-tabs">
+          <button onclick="switchTab('list')" id="tab-list" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all-300 bg-brand-500 text-white shadow-md shadow-brand-500/10">
+            <i class="fa-solid fa-book-open w-4"></i>
+            <span>主动词汇库</span>
+          </button>
+          
+          <button onclick="switchTab('ebbinghaus')" id="tab-ebbinghaus" class="relative w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all-300 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900">
+            <i class="fa-solid fa-brain w-4 text-indigo-500"></i>
+            <span>艾宾浩斯复习</span>
+            <span id="ebbinghaus-badge" class="hidden absolute right-4 bg-orange-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full animate-bounce">0</span>
+          </button>
+
+          <button onclick="switchTab('flashcard')" id="tab-flashcard" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all-300 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900">
+            <i class="fa-solid fa-layer-group w-4"></i>
+            <span>3D 卡片记忆</span>
+          </button>
+          
+          <button onclick="switchTab('quiz')" id="tab-quiz" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all-300 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900">
+            <i class="fa-solid fa-circle-question w-4"></i>
+            <span>词汇挑战自测</span>
+          </button>
+          
+          <button onclick="switchTab('stats')" id="tab-stats" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all-300 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900">
+            <i class="fa-solid fa-chart-pie w-4"></i>
+            <span>进度成就分析</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Quick Progress Widget & Settings -->
+      <div class="p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
+        <!-- Progress Summary -->
+        <div class="mb-4">
+          <div class="flex justify-between text-[10px] font-black mb-1 text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            <span>当前库进度</span>
+            <span id="overall-progress-text">0% (0/155)</span>
+          </div>
+          <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div id="overall-progress-bar" class="bg-gradient-to-r from-sky-400 to-indigo-500 h-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Pronunciation Settings Quick Toggle -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">发音口音</span>
+            <select id="voice-accent-select" onchange="changeVoiceAccent()" class="text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1 outline-none font-medium text-slate-700 dark:text-slate-200">
+              <option value="en-GB">🇬🇧 英音 (UK)</option>
+              <option value="en-US">🇺🇸 美音 (US)</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              <span>语速: <span id="speed-val">1.0</span>x</span>
+            </div>
+            <input type="range" id="voice-speed" min="0.5" max="1.5" step="0.1" value="1.0" oninput="changeSpeed()" class="w-full h-1 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-500">
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-h-0 bg-slate-50 dark:bg-slate-900">
+      
+      <!-- Top header with Search / Quick Stats / Dark Mode -->
+      <header class="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 sticky top-0 z-10 shadow-sm">
+        <div class="flex items-center gap-4 w-full sm:w-auto">
+          <div class="relative flex-1 sm:flex-none">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text" id="global-search" oninput="triggerSearch()" placeholder="搜索英文或中文释义..." class="w-full sm:w-64 pl-9 pr-4 py-2 text-sm bg-slate-100 dark:bg-slate-900 border-none rounded-xl focus:ring-2 focus:ring-sky-500 outline-none transition-all dark:text-slate-200">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-200 dark:border-slate-800">
+          <div id="filter-indicator" class="text-xs font-semibold px-3 py-1.5 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 rounded-full flex items-center gap-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-sky-500"></span>
+            筛选: <span id="current-filter-label">全部核心词</span>
+          </div>
+
+          <!-- Theme Toggle -->
+          <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all">
+            <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Dynamic Screen Content -->
+      <div class="flex-1 overflow-y-auto p-6" id="app-screens">
+        
+        <!-- ==================== 1. WORD LIST SCREEN ==================== -->
+        <section id="screen-list" class="space-y-6">
+          
+          <!-- Quick Filter Selector (Letters or Chapters based on selected Library) -->
+          <div class="bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+            <!-- M1 Mechanics View Filter (Chapters) -->
+            <div id="filter-m1-row" class="block">
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2.5 flex items-center gap-1.5">
+                <i class="fa-solid fa-compass-drafting"></i>
+                按 M1 力学机制章节筛选 (Mechanics Chapters)
+              </h3>
+              <div class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-1.5">
+                <button onclick="filterByChapter('all')" id="chap-btn-all" class="chap-btn px-2 py-1.5 rounded-xl text-xs font-bold transition-all bg-sky-500 text-white">全部</button>
+                <button onclick="filterByChapter(1)" id="chap-btn-1" class="chap-btn px-2 py-1.5 rounded-xl text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200">Ch 1</button>
+                <button onclick="filterByChapter(2)" id="chap-btn-2" class="chap-btn px-2 py-1.5 rounded-xl text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200">Ch 2</button>
+                <button onclick="filterByChapter(3)" id="chap-btn-3" class="chap-btn px-2 py-1.5 rounded-xl text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200">Ch 3</button>
+                <button onclick="filterByChapter(4)" id="chap-btn-4" class="chap-btn px-2 py-1.5 rounded-xl text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200">Ch 4</button>
+                <button onclick="filterByChapter(5)" id="chap-btn-5" class="chap-btn px-2 py-1.5 rounded-xl text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200">Ch 5</button>
+                <button onclick="filterByChapter(6)" id="chap-btn-6" class="chap-btn px-2 py-1.5 rounded-xl text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200">Ch 6</button>
+                <button onclick="filterByChapter(7)" id="chap-btn-7" class="chap-btn px-2 py-1.5 rounded-xl text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200">Ch 7</button>
+                <button onclick="filterByChapter(8)" id="chap-btn-8" class="chap-btn px-2 py-1.5 rounded-xl text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200">Ch 8</button>
+              </div>
+            </div>
+
+            <!-- Longman 3000 View Filter (Frequency Markers S/W & A-Z Jumper) -->
+            <div id="filter-longman-row" class="hidden space-y-4">
+              <div>
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2.5 flex items-center gap-1.5">
+                  <i class="fa-solid fa-arrow-down-wide-short"></i>
+                  按书面/口语频率筛选 (Frequency Markers)
+                </h3>
+                <div class="flex flex-wrap gap-1.5">
+                  <button onclick="filterByMarker('all')" id="marker-btn-all" class="marker-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-sky-500 text-white">全部 (All)</button>
+                  <button onclick="filterByMarker('S1')" id="marker-btn-S1" class="marker-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200">S1 (口语 Top 1000)</button>
+                  <button onclick="filterByMarker('S2')" id="marker-btn-S2" class="marker-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200">S2 (口语 Top 2000)</button>
+                  <button onclick="filterByMarker('W1')" id="marker-btn-W1" class="marker-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200">W1 (书面 Top 1000)</button>
+                  <button onclick="filterByMarker('W2')" id="marker-btn-W2" class="marker-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200">W2 (书面 Top 2000)</button>
+                </div>
+              </div>
+
+              <div class="border-t border-slate-100 dark:border-slate-900 pt-3">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 flex items-center gap-1.5">
+                  <i class="fa-solid fa-arrow-down-a-z"></i>
+                  首字母快速索引 (A-Z Jumper)
+                </h3>
+                <div class="flex flex-wrap gap-1" id="letter-selector-row">
+                  <!-- Javascript will inject letter list -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vocabulary Header and filter view options -->
+          <div class="flex items-center justify-between">
+            <h2 class="font-extrabold text-base sm:text-lg flex items-center gap-2">
+              <span id="library-title-label">Edexcel M1 机械力学词汇</span>
+              <span id="word-count-badge" class="px-2.5 py-0.5 text-xs font-extrabold rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300">0 词</span>
+            </h2>
+            
+            <div class="flex items-center gap-1.5 text-xs">
+              <button onclick="toggleOnlyStarred(false)" id="show-all-btn" class="px-3 py-1.5 rounded-lg font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">全部</button>
+              <button onclick="toggleOnlyStarred(true)" id="show-starred-btn" class="px-3 py-1.5 rounded-lg font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-star text-amber-500 mr-1"></i>我的收藏
+              </button>
+            </div>
+          </div>
+
+          <!-- Vocabulary List Container -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="vocabulary-grid">
+            <!-- Dynamically generated vocab cards will go here -->
+          </div>
+
+          <!-- No Results State -->
+          <div id="no-results" class="hidden py-16 text-center">
+            <div class="text-slate-300 dark:text-slate-700 mb-4">
+              <i class="fa-solid fa-face-sad-tear text-5xl"></i>
+            </div>
+            <h3 class="font-bold text-lg">没有找到符合条件的词汇</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">请换个检索条件或清空筛选范围吧！</p>
+          </div>
+        </section>
+
+        <!-- ==================== 2. EBBINGHAUS REVIEW SCREEN ==================== -->
+        <section id="screen-ebbinghaus" class="hidden max-w-4xl mx-auto space-y-6">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="font-bold text-lg flex items-center gap-2">
+                <i class="fa-solid fa-brain text-indigo-500"></i>
+                <span>艾宾浩斯抗遗忘智能复习曲线</span>
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                点击任何词汇卡片上的大脑按钮，即可开启抗遗忘周期。首次复习自动设定在 **20分钟** 后！
+              </p>
+            </div>
+            <!-- Debug Time Warp -->
+            <button onclick="timeWarp20Mins()" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-amber-500/10 flex items-center gap-1.5 transition-all">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+              <span>调试：模拟流逝 20分钟</span>
+            </button>
+          </div>
+
+          <!-- Ebbinghaus States Widgets -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4">
+              <div class="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center text-lg shrink-0">
+                <i class="fa-solid fa-hourglass-start"></i>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">跟踪记忆中</span>
+                <strong class="text-lg font-bold" id="ebg-tracking-count">0</strong>
+              </div>
+            </div>
+
+            <div class="p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4">
+              <div class="w-10 h-10 bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 rounded-xl flex items-center justify-center text-lg shrink-0">
+                <i class="fa-solid fa-bell animate-bounce"></i>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">需复习词汇</span>
+                <strong class="text-lg font-bold text-orange-500" id="ebg-due-count">0</strong>
+              </div>
+            </div>
+
+            <div class="p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl flex items-center gap-4">
+              <div class="w-10 h-10 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center text-lg shrink-0">
+                <i class="fa-solid fa-award"></i>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block font-bold uppercase tracking-wider">终极固化成功</span>
+                <strong class="text-lg font-bold text-emerald-500" id="ebg-mastered-count">0</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Study Block -->
+          <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl relative animate-fade-in" id="ebbinghaus-active-panel">
+            <!-- Injected by Javascript -->
+          </div>
+
+          <!-- All schedule tracking items -->
+          <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6">
+            <h3 class="font-extrabold text-sm mb-4 flex items-center gap-2">
+              <i class="fa-solid fa-database text-sky-500"></i>
+              <span>抗遗忘记忆链一览 (当前词库)</span>
+            </h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-500 dark:text-slate-400 border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-100 dark:border-slate-800 text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                    <th class="py-3 px-4">英文单词</th>
+                    <th class="py-3 px-4">词义</th>
+                    <th class="py-3 px-4 text-center">当前进度</th>
+                    <th class="py-3 px-4">下次到期时间</th>
+                    <th class="py-3 px-4 text-right">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="ebbinghaus-schedule-tbody" class="divide-y divide-slate-50 dark:divide-slate-900">
+                  <!-- JS Injected Rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 3. FLASHCARD SCREEN ==================== -->
+        <section id="screen-flashcard" class="hidden max-w-2xl mx-auto py-4 space-y-6">
+          <div class="flex items-center justify-between">
+            <h2 class="font-bold text-lg flex items-center gap-2">
+              <i class="fa-solid fa-layer-group text-sky-500"></i>
+              <span>3D 卡片自记忆</span>
+            </h2>
+            <div class="text-xs bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full font-bold" id="card-progress-counter">
+              卡片 1 / 155
+            </div>
+          </div>
+
+          <!-- 3D Flashcard Object -->
+          <div class="relative w-full h-[26rem] sm:h-[30rem] perspective cursor-pointer" onclick="flipActiveCard()">
+            <div id="flashcard-obj" class="w-full h-full preserve-3d transition-transform duration-500 relative bg-transparent">
+              
+              <!-- Front Side (English & Visual associations) -->
+              <div class="absolute inset-0 backface-hidden bg-white dark:bg-slate-950 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-xl p-8 flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                  <div class="flex flex-wrap gap-1" id="card-front-markers">
+                    <!-- Marker Tags (Ch 1 or S1 etc) -->
+                  </div>
+                  <button onclick="toggleStarActiveCard(event)" class="text-xl text-slate-300 hover:text-amber-500 transition-colors">
+                    <i class="fa-solid fa-star" id="card-star-icon"></i>
+                  </button>
+                </div>
+
+                <div class="text-center space-y-4">
+                  <!-- Active Visual Image Symbol -->
+                  <div class="w-24 h-24 mx-auto rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-100 dark:border-sky-900/30 flex items-center justify-center text-4xl text-sky-500 shadow-inner" id="card-visual-anchor">
+                    <i class="fa-solid fa-icons"></i>
+                  </div>
+                  <div>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white" id="card-word">word</h1>
+                    <p class="text-sm font-semibold text-slate-400 dark:text-slate-500 font-serif mt-1" id="card-phonetic">/wɜ:d/</p>
+                    <p class="inline-block mt-2 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider rounded-full bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400" id="card-pos">n.</p>
+                  </div>
+                </div>
+
+                <div class="flex justify-between items-center text-xs text-slate-400">
+                  <span class="flex items-center gap-1.5"><i class="fa-solid fa-volume-high"></i> 点击卡片任意处翻面</span>
+                  <span class="flex items-center gap-1"><i class="fa-solid fa-rotate"></i> 翻转</span>
+                </div>
+              </div>
+
+              <!-- Back Side (Chinese, Collocations & Examples) -->
+              <div class="absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-br from-brand-600 to-sky-800 text-white rounded-3xl shadow-xl p-6 sm:p-8 flex flex-col justify-between overflow-y-auto">
+                <div class="flex justify-between items-start">
+                  <span class="px-2.5 py-1 bg-white/20 text-white rounded-lg text-xs font-bold" id="card-pos-back">
+                    n.
+                  </span>
+                  <span class="text-white/40"><i class="fa-solid fa-circle-info"></i> 已翻译</span>
+                </div>
+
+                <div class="space-y-4 my-2 text-center">
+                  <h2 class="text-3xl font-extrabold tracking-tight" id="card-zh">词义</h2>
+                  
+                  <!-- Active Learning Content (Collocation & Example) -->
+                  <div class="text-left bg-white/10 p-3.5 rounded-xl space-y-2.5 max-w-md mx-auto text-xs">
+                    <div id="card-collocations-box">
+                      <span class="block uppercase tracking-wider text-[10px] text-sky-200 font-black">常用搭配 Collocations</span>
+                      <p class="font-bold text-white mt-0.5" id="card-collocation-text">have the ability to do</p>
+                    </div>
+                    <div id="card-examples-box" class="border-t border-white/10 pt-2">
+                      <span class="block uppercase tracking-wider text-[10px] text-sky-200 font-black">语境例句 Example</span>
+                      <p class="italic text-white font-medium" id="card-example-en">He has the ability to succeed.</p>
+                      <p class="text-sky-100 mt-1 font-medium" id="card-example-zh">他有成功的潜力。</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex justify-between items-center text-xs text-white/70">
+                  <span>正面: <strong id="card-word-mini">word</strong></span>
+                  <span class="flex items-center gap-1"><i class="fa-solid fa-rotate"></i> 点击返回正面</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Card Navigation Controls -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-center">
+              <button onclick="navigateCard(-1)" class="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button onclick="speakCard()" class="w-14 h-14 rounded-full bg-sky-500 text-white flex items-center justify-center text-xl hover:bg-sky-600 transition-colors shadow-lg shadow-sky-500/20">
+                <i class="fa-solid fa-volume-high"></i>
+              </button>
+              <button onclick="navigateCard(1)" class="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+
+            <div class="flex gap-2 w-full sm:w-auto">
+              <button onclick="markActiveCardLearned(false)" id="card-unlearned-btn" class="flex-1 sm:flex-none px-4 py-3 rounded-xl border border-rose-200 dark:border-rose-900 text-rose-600 bg-rose-50 dark:bg-rose-950/20 text-xs font-bold flex items-center justify-center gap-2 hover:bg-rose-100 transition-all">
+                <i class="fa-regular fa-circle-xmark"></i>
+                <span>需多温习</span>
+              </button>
+              <button onclick="markActiveCardLearned(true)" id="card-learned-btn" class="flex-1 sm:flex-none px-4 py-3 rounded-xl border border-emerald-200 dark:border-emerald-900 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-100 transition-all">
+                <i class="fa-regular fa-circle-check"></i>
+                <span>已掌握</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== 4. QUIZ SCREEN ==================== -->
+        <section id="screen-quiz" class="hidden max-w-xl mx-auto py-4 space-y-6">
+          <div class="bg-white dark:bg-slate-950 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+            
+            <!-- Setup Screen of Quiz -->
+            <div id="quiz-setup" class="space-y-6">
+              <div class="text-center space-y-2">
+                <div class="inline-block p-4 bg-sky-50 dark:bg-sky-950/40 rounded-3xl text-sky-600 dark:text-sky-400 mb-2">
+                  <i class="fa-solid fa-gamepad text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-black tracking-tight" id="quiz-title">词汇挑战自测</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400">结合高频搭配与例句翻译，强化主动输出记忆力。</p>
+              </div>
+
+              <!-- Options Selection -->
+              <div class="space-y-4 pt-2">
+                <div class="space-y-2">
+                  <label class="text-xs font-bold uppercase tracking-wider text-slate-400">选择题目范围</label>
+                  <select id="quiz-range-select" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-sky-500 font-medium text-sm text-slate-800 dark:text-slate-100">
+                    <!-- Javascript dynamically populates range items based on selected library -->
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-xs font-bold uppercase tracking-wider text-slate-400">自测题数</label>
+                  <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setQuizNum(5)" id="quiz-num-5" class="quiz-num-btn py-2.5 rounded-xl border border-sky-500 bg-sky-50 dark:bg-sky-950/20 text-sky-600 dark:text-sky-400 text-xs font-bold">5 题</button>
+                    <button onclick="setQuizNum(10)" id="quiz-num-10" class="quiz-num-btn py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold hover:bg-slate-50">10 题</button>
+                    <button onclick="setQuizNum(20)" id="quiz-num-20" class="quiz-num-btn py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold hover:bg-slate-50">20 题</button>
+                  </div>
+                </div>
+              </div>
+
+              <button onclick="startQuiz()" class="w-full py-4 bg-gradient-to-r from-sky-500 to-indigo-600 text-white rounded-2xl font-bold text-sm shadow-lg shadow-brand-500/20 hover:from-sky-600 hover:to-indigo-700 transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-play"></i>
+                <span>开始测验挑战</span>
+              </button>
+            </div>
+
+            <!-- Quiz Running State -->
+            <div id="quiz-running" class="hidden space-y-6">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400" id="quiz-progress-text">第 1 / 10 题</span>
+                <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <i class="fa-regular fa-circle-check"></i>
+                  <span>得分: <strong id="quiz-score">0</strong></span>
+                </span>
+              </div>
+
+              <!-- Question Card -->
+              <div class="space-y-4">
+                <div class="p-6 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800/80 text-center relative">
+                  <div class="absolute right-4 top-4">
+                    <button onclick="speakQuizWord()" class="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 flex items-center justify-center text-sm hover:scale-105 transition-all">
+                      <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                  </div>
+                  <span class="text-xs text-slate-400 font-semibold uppercase tracking-widest block mb-1">请选择最符合该含义的单词</span>
+                  <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-sky-600 dark:text-sky-400" id="quiz-question-title">放弃，遗弃</h1>
+                </div>
+
+                <!-- Multiple Options Grid -->
+                <div class="space-y-2.5" id="quiz-options-container">
+                  <!-- Generated options dynamically -->
+                </div>
+              </div>
+
+              <!-- Next button/Progress bar -->
+              <div class="flex items-center justify-between gap-4 pt-2">
+                <div class="flex-1 bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                  <div id="quiz-progress-bar" class="bg-sky-500 h-full w-0 transition-all"></div>
+                </div>
+                <button onclick="nextQuizQuestion()" id="quiz-next-btn" class="hidden px-5 py-2.5 bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5">
+                  <span>下一题</span>
+                  <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Quiz Score Result Screen -->
+            <div id="quiz-result" class="hidden text-center space-y-6 py-6">
+              <div class="space-y-2">
+                <div class="text-6xl" id="quiz-result-emoji">🎉</div>
+                <h2 class="text-2xl font-extrabold" id="quiz-result-title">挑战完成！</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400" id="quiz-result-subtitle">答对 8 题，正确率 80%</p>
+              </div>
+
+              <div class="p-6 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <span class="text-xs font-semibold text-slate-400 block mb-1">测试总题</span>
+                    <strong class="text-xl font-bold" id="quiz-res-total">10</strong>
+                  </div>
+                  <div>
+                    <span class="text-xs font-semibold text-slate-400 block mb-1">答对题数</span>
+                    <strong class="text-xl font-bold text-emerald-500" id="quiz-res-correct">8</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-2">
+                <button onclick="resetQuiz()" class="flex-1 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-xs transition-colors">
+                  返回设置
+                </button>
+                <button onclick="startQuiz()" class="flex-1 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-bold text-xs transition-colors">
+                  再测一次
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ==================== 5. STATS SCREEN ==================== -->
+        <section id="screen-stats" class="hidden space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center space-x-4">
+              <div class="w-12 h-12 bg-sky-100 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 rounded-xl flex items-center justify-center text-xl">
+                <i class="fa-solid fa-list-check"></i>
+              </div>
+              <div>
+                <span class="text-xs font-semibold text-slate-400 block">已完全掌握 (当前词库)</span>
+                <strong class="text-2xl font-black" id="stats-learned-count">0</strong>
+                <span class="text-[11px] text-slate-500">掌握率约 <span id="stats-learned-pct">0</span>%</span>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center space-x-4">
+              <div class="w-12 h-12 bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center text-xl">
+                <i class="fa-solid fa-star"></i>
+              </div>
+              <div>
+                <span class="text-xs font-semibold text-slate-400 block">我的收藏词汇</span>
+                <strong class="text-2xl font-black" id="stats-starred-count">0</strong>
+                <span class="text-[11px] text-slate-500">重点跟进词汇</span>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center space-x-4">
+              <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center text-xl">
+                <i class="fa-solid fa-award"></i>
+              </div>
+              <div>
+                <span class="text-xs font-semibold text-slate-400 block">艾宾浩斯已固化</span>
+                <strong class="text-2xl font-black" id="stats-ebg-mastered-count">0</strong>
+                <span class="text-[11px] text-slate-500">终极掌握词汇</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Active Study Tip -->
+          <div class="bg-gradient-to-tr from-brand-600 to-indigo-700 text-white p-6 rounded-3xl space-y-2 shadow-xl">
+            <h3 class="font-extrabold text-base flex items-center gap-2">
+              <i class="fa-solid fa-bolt animate-pulse"></i>
+              <span>主动学习与机械力学数学（Active Learning in Mechanics）</span>
+            </h3>
+            <p class="text-xs text-sky-100 leading-relaxed max-w-4xl">
+              无论是抽象的 **Edexcel M1 Mechanics 物理运动定律**，还是广泛的 **Longman 核心学术高频词**。本系统完美结合了**搭配 (Collocations)** 与**真实例句图像联想**。双语对应加上标准的语音流，能帮助您在理解力学公式的同时，直接攻克专业双语试卷中的核心学术难关。请一定要多运用 “3D 卡片” 进行自省和自我判定，辅以艾宾浩斯 20 分钟黄金记忆律，达到最高效的回想效果！
+            </p>
+          </div>
+
+          <!-- System Customization Settings Card -->
+          <div class="bg-white dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+            <h3 class="font-extrabold text-xs flex items-center gap-2 text-slate-500 uppercase tracking-wider">
+              <i class="fa-solid fa-sliders text-sky-500"></i>
+              <span>系统标题与个性化名称设置</span>
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">系统主标题名称 (AppName)</label>
+                <input type="text" id="setting-app-title" class="w-full text-xs p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-sky-500 text-slate-800 dark:text-slate-100 font-semibold" placeholder="M1 & Longman Dual">
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">系统副标题介绍 (SubAppName)</label>
+                <input type="text" id="setting-app-subtitle" class="w-full text-xs p-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-sky-500 text-slate-800 dark:text-slate-100 font-semibold" placeholder="双语智能抗遗忘系统">
+              </div>
+            </div>
+            <div class="flex justify-end gap-2.5">
+              <button onclick="restoreDefaultTitle()" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-850 text-slate-600 dark:text-slate-400 rounded-xl text-xs font-bold transition-all">恢复默认</button>
+              <button onclick="saveCustomTitle()" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-bold shadow-md shadow-sky-500/10 transition-all flex items-center gap-1">
+                <i class="fa-solid fa-check"></i>
+                <span>保存命名修改</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Danger actions / Reset progress -->
+          <div class="flex justify-end">
+            <button onclick="triggerResetProgressPrompt()" class="px-4 py-2.5 border border-rose-200 dark:border-rose-950 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+              <i class="fa-regular fa-trash-can"></i>
+              <span>清空当前词库的所有记忆与收藏数据</span>
+            </button>
+          </div>
+        </section>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Custom Beautiful Confirmation Dialog (Strictly no alert/confirm) -->
+  <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+    <div class="bg-white dark:bg-slate-950 max-w-md w-full rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+      <div class="flex items-center gap-3 text-amber-500">
+        <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+        <h3 class="font-extrabold text-base text-slate-900 dark:text-white" id="confirm-title">确认操作</h3>
+      </div>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed" id="confirm-message">您确定要执行此操作吗？此动作不可逆。</p>
+      <div class="flex gap-2.5 pt-2">
+        <button onclick="closeConfirmModal(false)" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-all">取消</button>
+        <button id="confirm-yes-btn" class="flex-1 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition-all">确定执行</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Message Box -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 text-xs font-bold">
+    <i class="fa-solid fa-circle-info text-sky-500 text-sm" id="toast-icon"></i>
+    <span id="toast-msg">提示信息</span>
+  </div>
+
+  <!-- ==================== CORE JAVASCRIPT ==================== -->
+  <script>
+    // --- 1. EDEXCEL M1 MECHANICS COMPLETE DATABASE (155 Words) ---
+    const m1Data = [
+      { id: 1, chapter: 1, word: "mechanics", phonetic: "/mə'kænıks/", pos: "n.", zh: "力学", collocations: ["classical mechanics (经典力学)", "mechanics model (力学模型)"], example_en: "Mechanics is the branch of physics dealing with the motion of bodies.", example_zh: "力学是研究物体运动的物理学分支。", img: "fa-compass-drafting" },
+      { id: 2, chapter: 1, word: "motion", phonetic: "/'məʊʃn/", pos: "n.", zh: "运动", collocations: ["equations of motion (运动方程)", "uniform motion (匀速运动)"], example_en: "We will model the motion of a ball falling freely under gravity.", example_zh: "我们将模拟在重力作用下自由下落的球的运动。", img: "fa-route" },
+      { id: 3, chapter: 1, word: "force", phonetic: "/fɔ:s/", pos: "n.", zh: "力", collocations: ["gravitational force (重力)", "resultant force (合力)"], example_en: "Force is a vector quantity that has both magnitude and direction.", example_zh: "力是一个既有大小又有方向的矢量。", img: "fa-bolt-lightning" },
+      { id: 4, chapter: 1, word: "model", phonetic: "/'mɒdl/", pos: "n.", zh: "模型", collocations: ["mathematical model (数学模型)", "simplified model (简化模型)"], example_en: "A particle is a model used to simplify the object in mechanics.", example_zh: "粒子是力学中用于简化物体的模型。", img: "fa-cubes" },
+      { id: 5, chapter: 1, word: "simulate", phonetic: "/'sımjʊleıt/", pos: "vt.", zh: "模拟", collocations: ["simulate motion (模拟运动)", "computer simulation (电脑模拟)"], example_en: "Scientists simulate the vehicle collisions to inspect safety levels.", example_zh: "科学家模拟车辆碰撞来检查安全等级。", img: "fa-computer" },
+      { id: 6, chapter: 1, word: "assumption", phonetic: "/ə'sʌmpʃn/", pos: "n.", zh: "假设", collocations: ["reasonable assumption (合理的假设)", "under the assumption (在...假设下)"], example_en: "Our primary assumption is that air resistance is completely negligible.", example_zh: "我们的首要假设是空气阻力完全可以忽略不计。", img: "fa-brain" },
+      { id: 7, chapter: 1, word: "validity", phonetic: "/və'lıdəti/", pos: "n.", zh: "有效性", collocations: ["test the validity (检验有效性)", "model's validity (模型的有效性)"], example_en: "We must perform experiments to test the validity of our mechanical model.", example_zh: "我们必须进行实验来检验我们力学模型的有效性。", img: "fa-square-check" },
+      { id: 8, chapter: 1, word: "prediction", phonetic: "/prı'dıkʃn/", pos: "n.", zh: "预测", collocations: ["theoretical prediction (理论预测)", "make predictions (做出预测)"], example_en: "The mathematical prediction matched the actual experimental values perfectly.", example_zh: "数学预测与实际实验值完美吻合。", img: "fa-crystal-ball" },
+      { id: 9, chapter: 1, word: "particle", phonetic: "/'pɑ:tıkl/", pos: "n.", zh: "粒子/质点", collocations: ["model as a particle (当作质点)", "mass of the particle (质点质量)"], example_en: "Treating a car as a particle means ignoring its physical dimensions.", example_zh: "把汽车看作质点意味着忽略其物理尺寸。", img: "fa-atom" },
+      { id: 10, chapter: 1, word: "dimension", phonetic: "/dı'menʃn/", pos: "n.", zh: "尺寸/维度", collocations: ["physical dimensions (物理尺寸)", "dimensionless quantity (无量纲量)"], example_en: "If we treat the object as a particle, we assume it has no dimensions.", example_zh: "如果我们把物体看作质点，我们假设它没有尺寸。", img: "fa-ruler-combined" },
+      { id: 11, chapter: 1, word: "negligible", phonetic: "/'neglıdʒəbl/", pos: "adj.", zh: "可以忽略的", collocations: ["negligible mass (忽略不计的质量)", "negligible resistance (微不足道的阻力)"], example_en: "The mass of the string is negligible, so we assume it is light.", example_zh: "绳子的质量可以忽略不计，所以我们假设它是轻质的。", img: "fa-eye-slash" },
+      { id: 12, chapter: 1, word: "mass", phonetic: "/mæs/", pos: "n.", zh: "质量", collocations: ["centre of mass (质心)", "constant mass (恒定质量)"], example_en: "Mass is a scalar quantity and is measured in kilograms.", example_zh: "质量是一个标量，以千克为单位进行测量。", img: "fa-weight-hanging" },
+      { id: 13, chapter: 1, word: "rotational", phonetic: "/rəʊ'teɪʃənl/", pos: "adj.", zh: "旋转的", collocations: ["rotational motion (旋转运动)", "rotational force (转动力)"], example_en: "Particles do not experience rotational motion in our simplified model.", example_zh: "在我们的简化模型中，质点不会经历旋转运动。", img: "fa-arrows-spin" },
+      { id: 14, chapter: 1, word: "resistance", phonetic: "/rı'zıstəns/", pos: "n.", zh: "阻力", collocations: ["air resistance (空气阻力)", "frictional resistance (摩擦阻力)"], example_en: "Air resistance increases significantly as the speed of projection rises.", example_zh: "空气阻力随着发射速度的增加而显著增加。", img: "fa-shield-halved" },
+      { id: 15, chapter: 1, word: "rod", phonetic: "/rɒd/", pos: "n.", zh: "棒", collocations: ["uniform rod (均匀棒)", "rigid rod (刚性棒)"], example_en: "A rod has only one dimension, which simplifies force calculation.", example_zh: "棒只有一个维度的尺寸，这简化了受力计算。", img: "fa-grip-lines" },
+      { id: 16, chapter: 1, word: "thickness", phonetic: "/'θıknəs/", pos: "n.", zh: "厚度", collocations: ["negligible thickness (可以忽略的厚度)"], example_en: "A rod is assumed to have negligible thickness.", example_zh: "一根棒被假定为具有可以忽略不计的厚度。", img: "fa-bars" },
+      { id: 17, chapter: 1, word: "rigid", phonetic: "/'rıdʒıd/", pos: "adj.", zh: "坚硬的/刚性的", collocations: ["rigid body (刚体)", "rigid structure (刚性结构)"], example_en: "A rigid rod will not bend or buckle when forces are applied.", example_zh: "受力时，刚性棒不会弯曲或发生屈曲。", img: "fa-border-all" },
+      { id: 18, chapter: 1, word: "bend", phonetic: "/bend/", pos: "v.", zh: "弯曲", collocations: ["bend under pressure (受压弯曲)", "does not bend (不弯曲)"], example_en: "A rigid beam will not bend under a normal load.", example_zh: "均匀的梁在正常负荷下不会发生弯曲。", img: "fa-code-branch" },
+      { id: 19, chapter: 1, word: "buckle", phonetic: "/'bʌkl/", pos: "v.", zh: "弯曲/瓦解", collocations: ["buckle under weight (因重压而瓦解)"], example_en: "If the applied force exceeds the limit, the rod might buckle.", example_zh: "如果施加的力超过极限，棒可能会发生屈曲弯曲。", img: "fa-compress" },
+      { id: 20, chapter: 1, word: "lamina", phonetic: "/'læmınə/", pos: "n.", zh: "薄板", collocations: ["uniform lamina (均匀薄板)", "lamina centre of mass (薄板质心)"], example_en: "A lamina is a flat sheet of metal with negligible thickness.", example_zh: "薄板是厚度可以忽略不计的扁平金属板。", img: "fa-file" },
+      { id: 21, chapter: 1, word: "uniform body", phonetic: "/'ju:nıfɔ:m 'bɒdi/", pos: "n.", zh: "均匀物体", collocations: ["uniform body density (物体均匀密度)"], example_en: "For a uniform body, the centre of mass is exactly at its geometric center.", example_zh: "对于均匀物体，其质心正好位于几何中心线上。", img: "fa-shapes" },
+      { id: 22, chapter: 1, word: "centre of mass", phonetic: "/'sentə ɒv mæs/", pos: "n.", zh: "质心", collocations: ["position of centre of mass (质心位置)"], example_en: "We represent the entire weight of the lamina at its centre of mass.", example_zh: "我们把薄板的全部重量代表在它的质心上。", img: "fa-bullseye" },
+      { id: 23, chapter: 1, word: "string", phonetic: "/strıŋ/", pos: "n.", zh: "绳子/轻质绳", collocations: ["inextensible string (不可伸长绳)", "light string (轻质绳)"], example_en: "The string is assumed to be inextensible and light.", example_zh: "绳子被假定为不可伸展且质量忽略不计的。", img: "fa-bezier-curve" },
+      { id: 24, chapter: 1, word: "pulley", phonetic: "/'pʊli/", pos: "n.", zh: "滑轮", collocations: ["smooth pulley (光滑滑轮)", "fixed pulley (固定滑轮)"], example_en: "The tension on both sides of a smooth pulley is identical.", example_zh: "光滑滑轮两边的拉力大小是相同的。", img: "fa-circle-notch" },
+      { id: 25, chapter: 1, word: "tension", phonetic: "/'tenʃn/", pos: "n.", zh: "拉力/张力", collocations: ["tension in the string (绳子拉力)", "maximum tension (最大张力)"], example_en: "Tension acts along the string and pulls away from the attached body.", example_zh: "拉力沿着绳子起作用，拉向远离所连接物体的方向。", img: "fa-arrows-left-right" },
+      { id: 26, chapter: 1, word: "inextensible", phonetic: "/ınık'stensəbl/", pos: "adj.", zh: "不能伸展的", collocations: ["inextensible rope (不可伸展的绳子)"], example_en: "An inextensible string ensures connected particles share the same acceleration.", example_zh: "不可伸展的绳子确保连接的质点共享相同的加速度。", img: "fa-lock" },
+      { id: 27, chapter: 1, word: "acceleration", phonetic: "/ək'selə'reɪʃn/", pos: "n.", zh: "加速度", collocations: ["constant acceleration (恒定加速度)", "rate of acceleration (加速度大小)"], example_en: "Acceleration is the rate of change of velocity over time.", example_zh: "加速度是速度随时间的变化率。", img: "fa-gauge-high" },
+      { id: 28, chapter: 1, word: "taut", phonetic: "/tɔ:t/", pos: "adj.", zh: "拉紧的/紧绷的", collocations: ["string remains taut (绳子保持拉紧)"], example_en: "When the string is taut, the tension in it is greater than zero.", example_zh: "当绳子被拉紧时，其中的拉力大于零。", img: "fa-arrow-left-long" },
+      { id: 29, chapter: 1, word: "smooth", phonetic: "/smu:ð/", pos: "adj.", zh: "光滑的", collocations: ["smooth surface (光滑表面)", "smooth plane (光滑斜面)"], example_en: "On a smooth surface, we assume there is absolutely no friction.", example_zh: "在光滑平面上，我们假设完全没有摩擦力作用。", img: "fa-circle" },
+      { id: 30, chapter: 1, word: "friction", phonetic: "/'frıkʃn/", pos: "n.", zh: "摩擦力", collocations: ["limiting friction (极限摩擦力)", "frictional coefficient (摩擦系数)"], example_en: "Friction always opposes the direction of movement or relative motion tendency.", example_zh: "摩擦力总是阻碍运动或相对运动趋势的方向。", img: "fa-ring" },
+      { id: 31, chapter: 1, word: "rough", phonetic: "/rʌf/", pos: "adj.", zh: "粗糙的", collocations: ["rough horizontal table (粗糙的水平桌面)"], example_en: "Friction must be calculated when objects move on a rough surface.", example_zh: "当物体在粗糙平面上运动时，必须计算摩擦力。", img: "fa-braille" },
+      { id: 32, chapter: 1, word: "metal", phonetic: "/'metl/", pos: "n.", zh: "金属", collocations: ["metal ring (金属环)", "heavy metal plate (重金属板)"], example_en: "The peg is made of smooth metal to minimize friction.", example_zh: "支架由光滑金属制成，以使摩擦最小化。", img: "fa-hammer" },
+      { id: 33, chapter: 1, word: "bead", phonetic: "/bi:d/", pos: "n.", zh: "珠子", collocations: ["bead threaded on a string (穿在绳子上的珠子)"], example_en: "A bead is threaded on an inextensible light string.", example_zh: "一个珠子被穿在一根不可伸展的轻质绳子上。", img: "fa-ellipsis" },
+      { id: 34, chapter: 1, word: "peg", phonetic: "/peg/", pos: "n.", zh: "支架/固定轴", collocations: ["smooth fixed peg (光滑固定销)"], example_en: "The string passes over a smooth fixed peg on the wall.", example_zh: "绳子穿过墙上一个光滑固定的支架栓。", img: "fa-anchor" },
+      { id: 35, chapter: 1, word: "dimensionless", phonetic: "/dı'menʃnləs/", pos: "adj.", zh: "无量纲的/无尺寸的", collocations: ["dimensionless ratio (无量纲比率)"], example_en: "The particle model represents a dimensionless point mass.", example_zh: "质点模型代表一个没有尺寸大小的质量点。", img: "fa-scissors" },
+      { id: 36, chapter: 1, word: "gravity", phonetic: "/'grævəti/", pos: "n.", zh: "重力/地球引力", collocations: ["acceleration of gravity (重力加速度)"], example_en: "Gravity acts vertically downwards on all massive bodies.", example_zh: "重力垂直向下作用于所有具有质量的物体。", img: "fa-earth-americas" },
+      { id: 37, chapter: 1, word: "ceiling", phonetic: "/'si:lıŋ/", pos: "n.", zh: "天花板", collocations: ["attached to the ceiling (连接到天花板)"], example_en: "The string is attached to a fixed point on the ceiling.", example_zh: "绳子固定在天花板上的一个固定点上。", img: "fa-house" },
+      { id: 38, chapter: 1, word: "quantity", phonetic: "/'kwɒntəti/", pos: "n.", zh: "量", collocations: ["vector quantity (矢量)", "scalar quantity (标量)"], example_en: "Velocity is a vector quantity, while speed is a scalar quantity.", example_zh: "速度是一个矢量，而速率是一个标量。", img: "fa-scale-unbalanced" },
+      { id: 39, chapter: 1, word: "displacement", phonetic: "/dıs'pleısmənt/", pos: "n.", zh: "位移", collocations: ["angular displacement (角位移)", "total displacement (总位移)"], example_en: "Displacement is the straight-line distance from the starting point.", example_zh: "位移是离起点起算的直线距离。", img: "fa-arrow-right-arrow-left" },
+      { id: 40, chapter: 1, word: "unit", phonetic: "/'ju:nıt/", pos: "n.", zh: "单位", collocations: ["SI unit (国际标准单位)", "unit of force (力的单位)"], example_en: "The standard SI unit for acceleration is meters per second squared.", example_zh: "加速度的标准国际单位是米每二次方秒。", img: "fa-1" },
+      { id: 41, chapter: 1, word: "velocity", phonetic: "/və'lɒsəti/", pos: "n.", zh: "速度", collocations: ["initial velocity (初速度)", "terminal velocity (终端速度)"], example_en: "Velocity describes both the speed and direction of motion.", example_zh: "速度同时描述了运动的速率和方向。", img: "fa-arrow-trend-up" },
+      { id: 42, chapter: 1, word: "magnitude", phonetic: "/'mægnıtju:d/", pos: "n.", zh: "大小/数值", collocations: ["magnitude of tension (拉力大小)", "magnitude of force (力的大小)"], example_en: "We need to calculate the magnitude of the reaction force.", example_zh: "我们需要计算该反作用力的大小数值。", img: "fa-arrow-up-right-dots" },
+      { id: 43, chapter: 1, word: "thrust", phonetic: "/θrʌst/", pos: "n.", zh: "推力", collocations: ["upward thrust (向上推力)", "engine thrust (发动机推力)"], example_en: "The rocket generates a massive thrust to overcome gravity.", example_zh: "火箭产生巨大的推力以克服重力下落趋势。", img: "fa-plane" },
+      { id: 44, chapter: 1, word: "compression", phonetic: "/kəm'preʃn/", pos: "n.", zh: "压缩/压应力", collocations: ["under compression (承受压缩)", "compression force (压缩力)"], example_en: "Unlike strings, rigid rods can support forces under compression.", example_zh: "与轻绳不同，刚性棒可以承受压缩力的作用。", img: "fa-compress" },
+      { id: 45, chapter: 1, word: "buoyancy", phonetic: "/'bɔıənsi/", pos: "n.", zh: "浮力", collocations: ["buoyancy force (浮力)"], example_en: "The buoyancy force of water supports the floating boat.", example_zh: "水的浮力支撑着漂浮的船体。", img: "fa-water" },
+      { id: 46, chapter: 1, word: "opposite", phonetic: "/'ɒpəzıt/", pos: "adj.", zh: "相反的", collocations: ["opposite direction (相反方向)"], example_en: "Forces acting in opposite directions can maintain the equilibrium.", example_zh: "作用于相反方向的两个力可以维持平衡状态。", img: "fa-right-left" },
+
+      // Chapter 2
+      { id: 47, chapter: 2, word: "displacement-time graph", phonetic: "/dıs'pleısmənt taım gra:f/", pos: "n.", zh: "位移-时间图像", collocations: ["slope of displacement-time graph (位移-时间图斜率)"], example_en: "The gradient of a displacement-time graph represents the velocity.", example_zh: "位移-时间图像的斜率代表其速度大小。", img: "fa-chart-line" },
+      { id: 48, chapter: 2, word: "convert", phonetic: "/kən'vɜ:t/", pos: "vi.", zh: "转变/转换", collocations: ["convert units (单位转换)"], example_en: "Remember to convert speed from km/h to m/s in calculations.", example_zh: "在计算中记住把速度单位从千米/时转换为米/秒。", img: "fa-right-from-bracket" },
+      { id: 49, chapter: 2, word: "stationary", phonetic: "/'steɪʃənri/", pos: "adj.", zh: "静止的", collocations: ["remains stationary (保持静止)"], example_en: "The particle was stationary for the first three seconds.", example_zh: "在最初的三秒钟内，该质点是完全静止的。", img: "fa-hand" },
+      { id: 50, chapter: 2, word: "speed", phonetic: "/spi:d/", pos: "n.", zh: "速率", collocations: ["average speed (平均速率)", "constant speed (恒定速率)"], example_en: "Speed is a scalar value and does not indicate the direction.", example_zh: "速率是一个标量值，并不指示物体的运动方向。", img: "fa-gauge" },
+      { id: 51, chapter: 2, word: "velocity-time graph", phonetic: "/və'lɒsəti taım gra:f/", pos: "n.", zh: "速度-时间图像", collocations: ["area under velocity-time graph (速度-时间图下方面积)"], example_en: "The area under a velocity-time graph represents the displacement.", example_zh: "速度-时间图像下方的面积代表其产生的位移。", img: "fa-chart-area" },
+      { id: 52, chapter: 2, word: "deceleration", phonetic: "/di:selə'reıʃn/", pos: "n.", zh: "减速/负加速度", collocations: ["constant deceleration (匀减速)"], example_en: "A constant deceleration brought the car to a safe halt.", example_zh: "恒定的负加速度（减速）使汽车安全停下。", img: "fa-arrow-down-long" },
+      { id: 53, chapter: 2, word: "retardation", phonetic: "/ri:tɑ:'deıʃn/", pos: "n.", zh: "减速/阻滞", collocations: ["rate of retardation (减速变化率)"], example_en: "Retardation is another term commonly used for negative acceleration.", example_zh: "减速（阻滞）是负加速度的另一种常用术语。", img: "fa-square-minus" },
+      { id: 54, chapter: 2, word: "illustrate", phonetic: "/'ıləstreıt/", pos: "vt.", zh: "阐明/说明", collocations: ["illustrate with a diagram (用图说明)"], example_en: "We will sketch a graph to illustrate the motion of the train.", example_zh: "我们将绘制一个图像以说明火车的运动规律。", img: "fa-pen-clip" },
+      { id: 55, chapter: 2, word: "uniformly", phonetic: "/'ju:nıfɔ:mli/", pos: "adv.", zh: "均匀地/匀速地", collocations: ["uniformly accelerated (匀加速的)"], example_en: "The particle accelerates uniformly along the straight track.", example_zh: "质点沿着直线轨道均匀加速运动。", img: "fa-grip-horizontal" },
+      { id: 56, chapter: 2, word: "initial", phonetic: "/ı'nıʃl/", pos: "adj.", zh: "最初的/初期的", collocations: ["initial position (初始位置)", "initial speed (初速度)"], example_en: "The ball was thrown upwards with an initial velocity of 15 m/s.", example_zh: "球被以15米每秒的初速度向上抛出。", img: "fa-circle-play" },
+      { id: 57, chapter: 2, word: "final", phonetic: "/'faınl/", pos: "adj.", zh: "最终的", collocations: ["final velocity (末速度)", "final displacement (最终位移)"], example_en: "The final velocity of the falling book just before impact was recorded.", example_zh: "记录下了下落的书在碰撞前瞬间的末速度。", img: "fa-circle-stop" },
+      { id: 58, chapter: 2, word: "trapezium", phonetic: "/trə'pi:ziəm/", pos: "n.", zh: "梯形", collocations: ["area of a trapezium (梯形面积)"], example_en: "We use the area of a trapezium formula to calculate total displacement.", example_zh: "我们用梯形面积公式来算出总位移。", img: "fa-vector-square" },
+      { id: 59, chapter: 2, word: "acceleration-time graph", phonetic: "/ək'selə'reıʃn taım gra:f/", pos: "n.", zh: "加速度-时间图像", collocations: ["gradient of acceleration-time graph (加速度-时间图梯度)"], example_en: "The acceleration-time graph of a falling body with air resistance isn't flat.", example_zh: "有空气阻力的落体运动加速度-时间图像并不是水平的。", img: "fa-chart-bar" },
+      { id: 60, chapter: 2, word: "sloping", phonetic: "/'sləʊpıŋ/", pos: "adj.", zh: "倾斜的", collocations: ["sloping line (斜线)", "sloping ground (斜坡)"], example_en: "A sloping line on a velocity-time graph represents uniform acceleration.", example_zh: "速度-时间图像中的一条斜线代表着匀加速运动。", img: "fa-diagram-successor" },
+      { id: 61, chapter: 2, word: "constant", phonetic: "/'kɒnstənt/", pos: "adj.", zh: "恒定的/常数的", collocations: ["constant speed (恒定速率)", "constant force (恒力)"], example_en: "We calculate the movement using the SUVAT formulas under constant acceleration.", example_zh: "我们在恒定加速度条件下使用 SUVAT 方程计算运动。", img: "fa-infinity" },
+      { id: 62, chapter: 2, word: "letter", phonetic: "/'letə(r)/", pos: "n.", zh: "字母", collocations: ["algebraic letter (代数符号)"], example_en: "We use the letter 'u' to denote the initial velocity of a particle.", example_zh: "我们使用字母 'u' 来表示质点的初始速度。", img: "fa-font" },
+      { id: 63, chapter: 2, word: "label", phonetic: "/'leıbl/", pos: "v.", zh: "标记/标号", collocations: ["label the axes (标记坐标轴)"], example_en: "Please remember to label both axes with correct physical units.", example_zh: "请记住用正确的物理单位标记两条坐标轴。", img: "fa-tag" },
+      { id: 64, chapter: 2, word: "decimal", phonetic: "/'desıml/", pos: "n.", zh: "小数", collocations: ["decimal places (小数位)"], example_en: "Give your final answer correct to three decimal places.", example_zh: "给你的最终答案保留三位小数精度。", img: "fa-divide" },
+      { id: 65, chapter: 2, word: "work out", phonetic: "/wɜ:k aʊt/", pos: "v.", zh: "算出/计算出", collocations: ["work out equations (求出方程)"], example_en: "Can you work out the deceleration of the train from the graph?", example_zh: "你能根据图像算出火车的减速度吗？", img: "fa-calculator" },
+      { id: 66, chapter: 2, word: "kinematics", phonetic: "/kınə'mætıks/", pos: "n.", zh: "运动学", collocations: ["kinematics equations (运动学方程)"], example_en: "Kinematics describes motion without considering the forces causing it.", example_zh: "运动学描述物体的运动，而不考虑产生运动的受力情况。", img: "fa-rocket" },
+      { id: 67, chapter: 2, word: "factorise", phonetic: "/'fæktəraız/", pos: "vt.", zh: "因式分解", collocations: ["factorise quadratic equations (二次方程因式分解)"], example_en: "To find the time value when velocity is zero, we must factorise the formula.", example_zh: "为了找到速度为零的时间值，我们必须将该公式因式分解。", img: "fa-superscript" },
+      { id: 68, chapter: 2, word: "coefficient", phonetic: "/kəʊı'fıʃnt/", pos: "n.", zh: "系数", collocations: ["coefficient of friction (摩擦系数)", "quadratic coefficient (二次项系数)"], example_en: "The coefficient of t² in our displacement function represents half of acceleration.", example_zh: "我们的位移函数中 t² 的系数代表了二分之一的加速度。", img: "fa-percent" },
+      { id: 69, chapter: 2, word: "vertical", phonetic: "/'vɜ:tıkl/", pos: "adj.", zh: "垂直的/竖直的", collocations: ["vertical motion (竖直运动)", "vertical plane (竖直面)"], example_en: "A stone thrown vertically upwards experiences a downward acceleration of g.", example_zh: "垂直向上抛出的石头会经历一个向下的重力加速度 g 的作用。", img: "fa-arrows-up-down" },
+      { id: 70, chapter: 2, word: "time of flight", phonetic: "/taım ɒv flaıt/", pos: "n.", zh: "飞行时间", collocations: ["total time of flight (总飞行时间)"], example_en: "The total time of flight of the ball before hitting the ground was 4 seconds.", example_zh: "球落地前的总飞行时间是 4 秒钟。", img: "fa-hourglass-half" },
+      { id: 71, chapter: 2, word: "speed of projection", phonetic: "/spi:d ɒv prə'dʒekʃn/", pos: "n.", zh: "发射段飞行速度", collocations: ["initial speed of projection (发射初速度)"], example_en: "The speed of projection determines the maximum height reached.", example_zh: "发射段物体的运动速率决定了它能达到的最大高度。", img: "fa-bullseye" },
+      { id: 72, chapter: 2, word: "significant", phonetic: "/sıg'nıfıkənt/", pos: "adj.", zh: "重要的/显著的", collocations: ["significant figures (有效数字)"], example_en: "Unless otherwise stated, give your answers to three significant figures.", example_zh: "除非另有说明，否则您的答案一律保留三位有效数字。", img: "fa-asterisk" },
+      { id: 73, chapter: 2, word: "downward", phonetic: "/'daʊnwəd/", pos: "adj.", zh: "向下的", collocations: ["downward direction (向下方向)", "downward force (向下力)"], example_en: "We choose the downward vertical direction as positive in gravity calculation.", example_zh: "我们在计算重力运动时选择垂直向下的方向作为正方向。", img: "fa-arrow-down" },
+
+      // Chapter 3
+      { id: 74, chapter: 3, word: "vector", phonetic: "/'vektə(r)/", pos: "n.", zh: "矢量/向量", collocations: ["vector components (矢量分量)", "position vector (位置矢量)"], example_en: "Velocity and acceleration are both classic vector quantities.", example_zh: "速度和加速度都是典型的矢量物理量。", img: "fa-location-arrow" },
+      { id: 75, chapter: 3, word: "point of application", phonetic: "/pɔınt ɒv æplı'keıʃn/", pos: "n.", zh: "作用点", collocations: ["force point of application (力的作用点)"], example_en: "A force's effect depends heavily on its point of application.", example_zh: "一个力的作用效果在很大程度上取决于它的作用点位置。", img: "fa-crosshairs" },
+      { id: 76, chapter: 3, word: "scalar", phonetic: "/'skeılə(r)/", pos: "n.", zh: "标量", collocations: ["scalar quantity (标量值)"], example_en: "Time and mass are scalar quantities which do not have a direction.", example_zh: "时间和质量都是没有方向属性的标量物理量。", img: "fa-hashtag" },
+      { id: 77, chapter: 3, word: "essential", phonetic: "/ı'senʃl/", pos: "adj.", zh: "至关重要的", collocations: ["essential assumption (至关重要的假设)"], example_en: "An accurate force diagram is essential for solving mechanics problems.", example_zh: "一张精确的受力图对于解决机械力学问题至关重要。", img: "fa-bolt" },
+      { id: 78, chapter: 3, word: "clockwise", phonetic: "/'klɒkwaız/", pos: "adv.", zh: "顺时针方向地", collocations: ["rotate clockwise (顺时针旋转)"], example_en: "A clockwise moment tends to rotate the beam in that direction.", example_zh: "顺时针力矩倾向于让横梁朝该方向发生旋转。", img: "fa-rotate-right" },
+      { id: 79, chapter: 3, word: "dimensional", phonetic: "/dı'menʃənl/", pos: "adj.", zh: "维度的/维的", collocations: ["two-dimensional movement (二维运动)"], example_en: "We study two-dimensional vector additions in coordinate systems.", example_zh: "我们在坐标系中研究二维矢量的相加规律。", img: "fa-expand" },
+      { id: 80, chapter: 3, word: "component", phonetic: "/kəm'pəʊnənt/", pos: "n.", zh: "组成部分/分量", collocations: ["horizontal component (水平分量)", "resolve into components (分解为分量)"], example_en: "The vertical component of the force is calculated using F sinθ.", example_zh: "该力垂直方向的分量是用 F sinθ 计算出的。", img: "fa-puzzle-piece" },
+      { id: 81, chapter: 3, word: "notation", phonetic: "/nəʊ'teɪʃn/", pos: "n.", zh: "符号/记号", collocations: ["vector notation (向量符号)", "algebraic notation (代数记号)"], example_en: "We can express vectors using either column matrices or i-j notation.", example_zh: "我们可以使用列矩阵或 i-j 符号格式来表示向量。", img: "fa-signs-post" },
+      { id: 82, chapter: 3, word: "subtract", phonetic: "/səb'trækt/", pos: "vt.", zh: "减去", collocations: ["subtract vectors (向量相减)"], example_en: "To find the relative displacement, subtract the position vectors.", example_zh: "为了找到相对位移，只需将位置矢量相减。", img: "fa-minus" },
+      { id: 83, chapter: 3, word: "perpendicular", phonetic: "/pɜ:pən'dıkjələ(r)/", pos: "adj.", zh: "垂直的", collocations: ["perpendicular force (垂直力)", "mutually perpendicular (相互垂直的)"], example_en: "The gravity component perpendicular to the inclined plane is mg cosθ.", example_zh: "垂直于斜面方向的重力分量是 mg cosθ。", img: "fa-ruler-combined" },
+      { id: 84, chapter: 3, word: "straightforward", phonetic: "/streıt'fɔ:wəd/", pos: "adj.", zh: "简单的/直接的", collocations: ["straightforward calculation (直接的计算)"], example_en: "Resolving forces horizontally makes this kinematics problem straightforward.", example_zh: "沿水平方向分解受力让这道运动学问题变得直接而简单。", img: "fa-arrow-right-long" },
+      { id: 85, chapter: 3, word: "bearing", phonetic: "/'beərıŋ/", pos: "n.", zh: "方位/方位角", collocations: ["compass bearing (罗盘方位)", "three-figure bearing (三位数方位角)"], example_en: "The boat sailed on a bearing of 045 degrees from the port.", example_zh: "这艘船以距离港口 045 度的方位角航行。", img: "fa-compass" },
+      { id: 86, chapter: 3, word: "same straight line", phonetic: "/seım streıt laın/", pos: "n.", zh: "同一条直线", collocations: ["forces act along the same straight line (力作用于同一条直线上)"], example_en: "Collinear forces are forces acting along the same straight line.", example_zh: "共线力是指作用在同一条直线上的力系。", img: "fa-grip-lines" },
+      { id: 87, chapter: 3, word: "unrounded", phonetic: "/ʌn'raʊndıd/", pos: "adj.", zh: "不四舍五入的", collocations: ["unrounded values (未舍入的数值)"], example_en: "Keep unrounded values on your calculator during intermediate steps.", example_zh: "在中间计算步骤中，请在计算器上保留不四舍五入的原始数值。", img: "fa-ellipsis-h" },
+      { id: 88, chapter: 3, word: "multiply", phonetic: "/'mʌltıplaı/", pos: "v.", zh: "乘/乘以", collocations: ["multiply by scalar (乘以标量)"], example_en: "Multiply the velocity vector by time to obtain the displacement.", example_zh: "用速度向量乘以时间便可得到对应的位移变化。", img: "fa-xmark" },
+      { id: 89, chapter: 3, word: "denote", phonetic: "/dı'nəʊt/", pos: "vt.", zh: "表示/代表", collocations: ["denote as (表示为)"], example_en: "We often denote the acceleration of free fall using the letter 'g'.", example_zh: "我们经常使用字母 'g' 来代表自由落体加速度。", img: "fa-square-check" },
+
+      // Chapter 4
+      { id: 90, chapter: 4, word: "force diagram", phonetic: "/fɔ:s 'daıəgræm/", pos: "n.", zh: "受力分析图", collocations: ["draw a force diagram (画受力分析图)"], example_en: "A clear force diagram is the first step in analyzing static equilibrium.", example_zh: "清晰的受力图是分析静态平衡的第一步。", img: "fa-draw-polygon" },
+      { id: 91, chapter: 4, word: "arrow", phonetic: "/'ærəʊ/", pos: "n.", zh: "箭头", collocations: ["labeled arrow (标记的箭头)"], example_en: "Use an arrow to indicate the direction of the tension force.", example_zh: "使用箭头来标示该拉力的大小方向。", img: "fa-arrow-right" },
+      { id: 92, chapter: 4, word: "plane", phonetic: "/pleın/", pos: "n.", zh: "平面/斜面", collocations: ["horizontal plane (水平面)", "inclined plane (斜面)"], example_en: "The particle slides slowly down a rough inclined plane.", example_zh: "该质点沿着粗糙的斜面缓慢下滑。", img: "fa-layer-group" },
+      { id: 93, chapter: 4, word: "equilibrium", phonetic: "/i:kwı'lıbriəm/", pos: "n.", zh: "平衡/静态平衡", collocations: ["limiting equilibrium (临界平衡)", "static equilibrium (静态平衡)"], example_en: "When a body is in equilibrium, the resultant force on it is zero.", example_zh: "当物体处于平衡状态时，它所受的合外力为零。", img: "fa-scale-balanced" },
+      { id: 94, chapter: 4, word: "resultant", phonetic: "/rı'zʌltənt/", pos: "n.", zh: "合力", collocations: ["resultant vector (合矢量)", "resultant force (合力)"], example_en: "The resultant of two perpendicular forces can be found using Pythagoras' theorem.", example_zh: "两个垂直力的合力可以通过勾股定理求得。", img: "fa-compress-arrows-to-center" },
+      { id: 95, chapter: 4, word: "origin", phonetic: "/'ɒrıdʒın/", pos: "n.", zh: "原点", collocations: ["coordinate origin (坐标原点)"], example_en: "We define the starting position of the particle as the origin.", example_zh: "我们定义该质点的起始位置为坐标原点。", img: "fa-crosshairs" },
+      { id: 96, chapter: 4, word: "acceleration", phonetic: "/ək'selə'reıʃn/", pos: "n.", zh: "加速度", collocations: ["uniform acceleration (匀加速度)"], example_en: "A net resultant force causes the particle to undergo acceleration.", example_zh: "净合外力会使质点产生加速度运动。", img: "fa-gauge-high" },
+      { id: 97, chapter: 4, word: "friction", phonetic: "/'frıkʃn/", pos: "n.", zh: "摩擦力", collocations: ["kinetic friction (动摩擦力)"], example_en: "Friction acts to oppose the potential movement of the block.", example_zh: "摩擦力作用于阻碍物体的潜在运动趋势。", img: "fa-square-minus" },
+      { id: 98, chapter: 4, word: "motion", phonetic: "/'məʊʃn/", pos: "n.", zh: "运动", collocations: ["laws of motion (运动定律)"], example_en: "Newton's second law of motion states that force equals mass times acceleration.", example_zh: "牛顿第二运动定律指出力等于质量乘以加速度。", img: "fa-route" },
+      { id: 100, chapter: 4, word: "divide", phonetic: "/dı'vaıd/", pos: "v.", zh: "除以", collocations: ["divide by mass (除以质量)"], example_en: "To find acceleration, divide the net resultant force by the mass.", example_zh: "为了求得加速度，可用净合外力除以物体质量。", img: "fa-divide" },
+      { id: 101, chapter: 4, word: "connected particles", phonetic: "/kə'nektıd 'pɑ:tıklz/", pos: "n.", zh: "连接质点", collocations: ["system of connected particles (连接体系统)"], example_en: "We model two connected particles as a single unified system.", example_zh: "我们把两个连接的质点模型化为一个统一的系统进行研究。", img: "fa-circle-nodes" },
+      { id: 102, chapter: 4, word: "treat", phonetic: "/tri:t/", pos: "vt.", zh: "看作/对待", collocations: ["treat as a single particle (看作单一整体质点)"], example_en: "We can treat the car and trailer as a single composite body.", example_zh: "我们可以把轿车与拖车看作一个复合的单一物体。", img: "fa-user-gear" },
+      { id: 103, chapter: 4, word: "taut", phonetic: "/tɔ:t/", pos: "adj.", zh: "拉紧的", collocations: ["rope is taut (绳索拉紧)"], example_en: "While the engine pulls, the tow-bar remains completely taut.", example_zh: "引擎拉动时，拖车连接杆保持完全拉紧状态。", img: "fa-arrows-left-right" },
+      { id: 104, chapter: 4, word: "inextensible", phonetic: "/ınık'stensəbl/", pos: "adj.", zh: "不能伸展的", collocations: ["inextensible string (不可伸长绳)"], example_en: "The string is inextensible, so the magnitudes of acceleration are equal.", example_zh: "绳子不能伸长，因此两端物体的加速度大小相等。", img: "fa-lock" },
+      { id: 105, chapter: 4, word: "contact", phonetic: "/'kɒntækt/", pos: "n.", zh: "接触/接触力", collocations: ["contact force (接触力)", "normal contact force (法向接触反作用力)"], example_en: "The normal contact force acts perpendicularly outwards from the surface.", example_zh: "法向接触力垂直于表面向外起作用。", img: "fa-handshake" },
+      { id: 106, chapter: 4, word: "pulley", phonetic: "/'pʊli/", pos: "n.", zh: "滑轮/滑车", collocations: ["light smooth pulley (轻质光滑滑轮)"], example_en: "One block hangs vertically, while the other is on a plane, connected over a pulley.", example_zh: "一个物体垂直悬挂，另一个在平面上，通过滑轮连接。", img: "fa-circle-notch" },
+      { id: 107, chapter: 4, word: "on both sides", phonetic: "/ɒn bəʊθ saıdz/", pos: "n.", zh: "两边/双侧", collocations: ["forces on both sides (两边的受力情况)"], example_en: "Since the pulley is smooth, the tension on both sides is identical.", example_zh: "由于滑轮是光滑的，两边的拉力大小是相同的。", img: "fa-left-right" },
+      { id: 108, chapter: 4, word: "tension", phonetic: "/'tenʃn/", pos: "n.", zh: "拉力", collocations: ["tension constant (恒定张力)"], example_en: "We assume the tension is uniform throughout the light string.", example_zh: "我们假设拉力在这根轻质绳中是处处均匀相同的。", img: "fa-compress" },
+
+      // Chapter 5
+      { id: 109, chapter: 5, word: "resolve", phonetic: "/rı'zɒlv/", pos: "vt.", zh: "分解", collocations: ["resolve forces parallel to plane (沿平行于斜面方向分解力)"], example_en: "We resolve forces parallel and perpendicular to the inclined plane.", example_zh: "我们将力分解到平行和垂直于斜面的方向上。", img: "fa-arrows-split-up-and-left" },
+      { id: 110, chapter: 5, word: "drag", phonetic: "/dræg/", pos: "v.", zh: "拖拉/拖拽", collocations: ["drag along the table (沿桌面拖拽)"], example_en: "A heavy crate is dragged across a rough floor by a worker.", example_zh: "一个沉重的箱子被工人拖过粗糙的地板面。", img: "fa-truck-ramp-box" },
+      { id: 111, chapter: 5, word: "component", phonetic: "/kəm'pəʊnənt/", pos: "n.", zh: "分量", collocations: ["vertical component of weight (重力的垂直分量)"], example_en: "Resolve weight into components to analyze sliding behavior.", example_zh: "将重力分解为分量，以分析物体的下滑行为。", img: "fa-puzzle-piece" },
+      { id: 112, chapter: 5, word: "anticlockwise", phonetic: "/æntı'klɒkwaız/", pos: "adj.", zh: "逆时针方向的", collocations: ["rotate anticlockwise (逆时针旋转)"], example_en: "Moments turning anticlockwise are mathematically treated as positive here.", example_zh: "在这里，逆时针转动的力矩在数学计算上被视为正。", img: "fa-rotate-left" },
+      { id: 113, chapter: 5, word: "triangle law", phonetic: "/'traıæŋgl lɔ:/", pos: "n.", zh: "三角形法则", collocations: ["triangle law of forces (力的三角形法则)"], example_en: "The triangle law of vectors helps us quickly find the resultant force.", example_zh: "矢量三角形法则有助于我们快速求得合力。", img: "fa-triangle" },
+      { id: 114, chapter: 5, word: "inclined plane", phonetic: "/ın'klaınd pleın/", pos: "n.", zh: "斜面/斜坡", collocations: ["angle of inclined plane (斜面倾角)"], example_en: "The box remains stationary on the inclined plane due to friction.", example_zh: "由于摩擦力的作用，箱子在斜面上保持静止状态。", img: "fa-slope" },
+      { id: 115, chapter: 5, word: "slope", phonetic: "/sləʊp/", pos: "n.", zh: "斜坡/坡度", collocations: ["angle of the slope (斜坡的角度)"], example_en: "The slope rises at an angle of 30 degrees to the horizontal.", example_zh: "斜坡相对于水平方向上升了 30 度角。", img: "fa-triangle-exclamation" },
+      { id: 116, chapter: 5, word: "friction", phonetic: "/'frıkʃn/", pos: "n.", zh: "摩擦力", collocations: ["friction opposes motion (摩擦力阻碍运动)"], example_en: "Friction reaches its limiting value just as the block is about to slip.", example_zh: "当物体即将发生下滑时，摩擦力达到其最大临界值。", img: "fa-circle-dot" },
+      { id: 117, chapter: 5, word: "rough", phonetic: "/rʌf/", pos: "adj.", zh: "粗糙的", collocations: ["rough surface friction (粗糙表面摩擦)"], example_en: "We model the floor as rough because its friction cannot be ignored.", example_zh: "我们把地板模拟为粗糙的，因为其摩擦作用不可忽略。", img: "fa-barcode" },
+      { id: 118, chapter: 5, word: "tendency", phonetic: "/'tendənsi/", pos: "n.", zh: "趋势/走向", collocations: ["tendency of motion (运动趋势)"], example_en: "Friction acts in the direction opposite to the potential tendency of motion.", example_zh: "摩擦力作用于与潜在运动趋势相反的方向上。", img: "fa-arrow-trend-down" },
+      { id: 119, chapter: 5, word: "relative", phonetic: "/'relətıv/", pos: "adj.", zh: "相对的", collocations: ["relative velocity (相对速度)", "relative motion (相对运动)"], example_en: "The friction force opposes the relative motion between the contact surfaces.", example_zh: "摩擦力阻碍接触面之间的相对运动规律。", img: "fa-arrows-left-right" },
+      { id: 120, chapter: 5, word: "block", phonetic: "/blɒk/", pos: "n.", zh: "物体/木块", collocations: ["mass of the block (木块质量)", "smooth block (光滑木块)"], example_en: "A block of mass 5 kg is pulled along a rough horizontal table.", example_zh: "一个质量为 5 kg 的木块被沿着粗糙水平桌面拉动。", img: "fa-cubes-stacked" },
+      { id: 121, chapter: 5, word: "stationary", phonetic: "/'steɪʃənri/", pos: "adj.", zh: "静止的", collocations: ["remains stationary (保持不动)"], example_en: "If the applied force is too small, the block remains stationary.", example_zh: "如果施加的拉力过小，木块将保持静止不动状态。", img: "fa-square" },
+      { id: 122, chapter: 5, word: "sufficient", phonetic: "/sə'fıʃnt/", pos: "adj.", zh: "足够的/充分的", collocations: ["sufficient friction (足够的摩擦力)"], example_en: "Friction is sufficient to prevent the ladder from slipping down.", example_zh: "摩擦力足够大以防止梯子向下滑动瓦解。", img: "fa-check" },
+      { id: 123, chapter: 5, word: "apply", phonetic: "/ə'plaı/", pos: "vt.", zh: "施加/应用", collocations: ["apply a force (施加力)"], example_en: "We must apply a massive horizontal force to move the heavy block.", example_zh: "我们必须施加一个巨大的水平力来推动沉重的木块。", img: "fa-wrench" },
+      { id: 124, chapter: 5, word: "coefficient", phonetic: "/kəʊı'fıʃnt/", pos: "n.", zh: "系数", collocations: ["coefficient of friction (摩擦系数 μ)"], example_en: "The coefficient of friction between the block and plane is 0.4.", example_zh: "木块与斜面之间的摩擦系数是 0.4。", img: "fa-percent" },
+      { id: 125, chapter: 5, word: "oppose", phonetic: "/ə'pəʊz/", pos: "vt.", zh: "相反/阻碍", collocations: ["oppose motion (阻碍运动)"], example_en: "Friction will always act to oppose the direction of moving.", example_zh: "摩擦力将始终作用于阻碍运动方向的发生。", img: "fa-ban" },
+
+      // Chapter 6
+      { id: 126, chapter: 6, word: "momentum", phonetic: "/mə'mentəm/", pos: "n.", zh: "动量", collocations: ["conservation of momentum (动量守恒)", "total momentum (总动量)"], example_en: "Momentum is defined as the product of mass and velocity.", example_zh: "动量被定义为质量和速度的乘积。", img: "fa-gauge" },
+      { id: 127, chapter: 6, word: "impulse", phonetic: "/'ımpʌls/", pos: "n.", zh: "冲量", collocations: ["impulse force (冲力)", "magnitude of impulse (冲量大小)"], example_en: "The impulse of a force is equal to the change in momentum it causes.", example_zh: "一个力的冲量等于它所引起的动量变化量。", img: "fa-bolt-lightning" },
+      { id: 128, chapter: 6, word: "theoretical", phonetic: "/θıə'retıkl/", pos: "adj.", zh: "理论上的", collocations: ["theoretical prediction (理论预测)"], example_en: "Theoretical results assume no loss of energy during impact.", example_zh: "理论结果假设在碰撞期间没有能量的流失。", img: "fa-book" },
+      { id: 129, chapter: 6, word: "collision", phonetic: "/kə'lıʒn/", pos: "n.", zh: "碰撞", collocations: ["direct collision (直接碰撞)", "perfectly elastic collision (弹性碰撞)"], example_en: "During a collision, equal and opposite forces act on both bodies.", example_zh: "在碰撞期间，相同且相反的力作用在双方物体上。", img: "fa-burst" },
+      { id: 130, chapter: 6, word: "principle", phonetic: "/'prınsəpl/", pos: "n.", zh: "原理/法则", collocations: ["principle of conservation of momentum (动量守恒原理)"], example_en: "We apply the principle of conservation of momentum to solve the impact.", example_zh: "我们应用动量守恒原理来解决碰撞撞击问题。", img: "fa-gavel" },
+      { id: 131, chapter: 6, word: "conservation", phonetic: "/kɒnsə'veɪʃn/", pos: "n.", zh: "守恒", collocations: ["law of conservation (守恒定律)"], example_en: "Conservation of momentum applies if there are no external forces acting.", example_zh: "若没有外力作用，则动量守恒定律适用。", img: "fa-shield-halved" },
+      { id: 132, chapter: 6, word: "respectively", phonetic: "/rı'spektıvli/", pos: "adv.", zh: "分别地/依次地", collocations: ["velocities after collision are respectively (碰撞后速度依次为)"], example_en: "The masses of the two particles are 3 kg and 5 kg respectively.", example_zh: "这两个质点的质量分别为 3 kg 和 5 kg。", img: "fa-list-ol" },
+
+      // Chapter 7
+      { id: 133, chapter: 7, word: "static", phonetic: "/'stætık/", pos: "adj.", zh: "静力的/静态的", collocations: ["static equilibrium (静态平衡)"], example_en: "Static friction holds the block on the ramp from sliding down.", example_zh: "静态摩擦力使斜坡上的木块不会向下滑落。", img: "fa-hand" },
+      { id: 134, chapter: 7, word: "resolve", phonetic: "/rı'zɒlv/", pos: "vt.", zh: "解析/分解", collocations: ["resolve horizontally (沿水平方向分解)"], example_en: "We resolve all coplanar forces into horizontal and vertical components.", example_zh: "我们将所有共面力分解为水平和垂直分量分析。", img: "fa-circle-nodes" },
+      { id: 135, chapter: 7, word: "coplanar", phonetic: "/kəʊ'pleınə(r)/", pos: "adj.", zh: "共面的", collocations: ["system of coplanar forces (共面力系统)"], example_en: "Coplanar forces are forces that all act within the exact same plane.", example_zh: "共面力是指作用在完全相同平面内的力系。", img: "fa-layer-group" },
+      { id: 136, chapter: 7, word: "weight", phonetic: "/weıt/", pos: "n.", zh: "重力/重量", collocations: ["weight acts downwards (重力向下作用)"], example_en: "Weight is the force exerted on an object by gravity, W = mg.", example_zh: "重量是重力施加在物体上的力，W = mg。", img: "fa-weight-hanging" },
+      { id: 137, chapter: 7, word: "tension", phonetic: "/'tenʃn/", pos: "n.", zh: "张力/拉力", collocations: ["tension in cable (缆绳张力)"], example_en: "The tension in the string supports the heavy mass in equilibrium.", example_zh: "轻绳里的拉力支持着沉重的重物处于平衡状态。", img: "fa-arrows-left-right" },
+      { id: 138, chapter: 7, word: "pulley", phonetic: "/'pʊli/", pos: "n.", zh: "滑轮/滑车", collocations: ["pulley system (滑轮系统)"], example_en: "A pulley changes the direction of tension force without changing magnitude.", example_zh: "滑轮在不改变拉力大小的前提下，改变其拉力方向。", img: "fa-circle-notch" },
+      { id: 139, chapter: 7, word: "separately", phonetic: "/'sepərətli/", pos: "adv.", zh: "分别地/独立地", collocations: ["consider particles separately (独立考虑质点)"], example_en: "We analyze the forces acting on each particle separately.", example_zh: "我们分别对作用于每一个质点上的力进行独立分析。", img: "fa-arrows-split-up-and-left" },
+      { id: 140, chapter: 7, word: "absent", phonetic: "/'æbsənt/", pos: "adj.", zh: "缺席的/不存在的", collocations: ["absent forces (不存在的力)"], example_en: "Friction is absent because the coordinate plane is assumed smooth.", example_zh: "由于坐标面被假定为光滑的，因此摩擦力并不存在。", img: "fa-ban" },
+      { id: 141, chapter: 7, word: "perpendicular", phonetic: "/pɜ:pən'dıkjələ(r)/", pos: "n.", zh: "垂直线/垂直方向", collocations: ["line perpendicular to (垂直于...的线)"], example_en: "Draw a line perpendicular to the beam from the point of application.", example_zh: "自力的作用点向横梁绘制一条垂直线段。", img: "fa-ruler-combined" },
+      { id: 142, chapter: 7, word: "parallel", phonetic: "/'pærəlel/", pos: "n.", zh: "平行线/平行方向", collocations: ["parallel forces (平行力系)"], example_en: "Two parallel forces acting in same direction can be combined simply.", example_zh: "在同方向起作用的两个平行力可以简单地合并。", img: "fa-grip-lines" },
+
+      // Chapter 8
+      { id: 143, chapter: 8, word: "rigid body", phonetic: "/'rıdʒıd 'bɒdi/", pos: "n.", zh: "刚体", collocations: ["equilibrium of rigid body (刚体平衡)"], example_en: "A rigid body maintains its shape and does not deform under force.", example_zh: "刚性体（刚体）在受力作用下保持外形，不发生形变。", img: "fa-border-all" },
+      { id: 144, chapter: 8, word: "moment", phonetic: "/'məʊmənt/", pos: "n.", zh: "力矩", collocations: ["moment of a force (力的矩)", "take moments about pivot (绕支点计算力矩)"], example_en: "The moment of a force measures its capacity to cause rotation.", example_zh: "力的力矩测量的是它产生旋转运动的能力大小。", img: "fa-arrow-rotate-right" },
+      { id: 145, chapter: 8, word: "rotation", phonetic: "/rəʊ'teɪʃn/", pos: "n.", zh: "旋转", collocations: ["rotational equilibrium (旋转平衡)"], example_en: "A beam will start rotation if clockwise and anticlockwise moments aren't equal.", example_zh: "如果顺时针与逆时针力矩不相等，横梁就会发生旋转。", img: "fa-arrows-spin" },
+      { id: 146, chapter: 8, word: "pivot", phonetic: "/'pıvət/", pos: "n.", zh: "中心点/支点/枢轴", collocations: ["fixed pivot (固定支点)"], example_en: "The wooden beam balances on a small pivot placed at its center.", example_zh: "木梁平衡在放置于其中央的一个小支点上。", img: "fa-anchor" },
+      { id: 147, chapter: 8, word: "resultant moment", phonetic: "/rı'zʌltənt 'məʊmənt/", pos: "n.", zh: "合力矩", collocations: ["sum of resultant moment (合力矩之和)"], example_en: "If the resultant moment is zero, the rigid body is in rotational equilibrium.", example_zh: "如果合力矩为零，则该刚体处于旋转平衡状态。", img: "fa-rotate" },
+      { id: 148, chapter: 8, word: "coplanar", phonetic: "/kəʊ'pleınə(r)/", pos: "adj.", zh: "共面的", collocations: ["coplanar moments (共面力矩)"], example_en: "We study coplanar force moments acting on a rigid plank.", example_zh: "我们研究作用在刚性平板上的共面力矩平衡规律。", img: "fa-layer-group" },
+      { id: 149, chapter: 8, word: "act on", phonetic: "/ækt ɒn/", pos: "v.", zh: "对...起作用/作用于", collocations: ["forces act on beam (作用在梁上的力)"], example_en: "Multiple external loads act on the scaffolding beam.", example_zh: "多个外部负荷共同作用在脚手架横梁上。", img: "fa-compress-arrows-to-center" },
+      { id: 150, chapter: 8, word: "rotational", phonetic: "/rəʊ'teɪʃənl/", pos: "adj.", zh: "旋转的", collocations: ["rotational effect (转动效果)"], example_en: "Moment is the mathematical description of the rotational effect of force.", example_zh: "力矩是力的旋转效应的数学化描述方式。", img: "fa-arrows-spin" },
+      { id: 151, chapter: 8, word: "assumption", phonetic: "/ə'sʌmpʃn/", pos: "n.", zh: "假设", collocations: ["modeling assumptions (建模假设)"], example_en: "Our assumption that the plank is light means we ignore its weight.", example_zh: "我们关于木板是轻质的假设意味着我们忽略其重力作用。", img: "fa-brain" },
+      { id: 152, chapter: 8, word: "reaction", phonetic: "/rı'ækʃn/", pos: "n.", zh: "反作用力", collocations: ["reaction force at support (支点处的反作用力)"], example_en: "The support peg exerts a vertical upward reaction force on the beam.", example_zh: "支撑栓对横梁施加了一个垂直向上的支撑反作用力。", img: "fa-arrow-up" },
+      { id: 153, chapter: 8, word: "uniform", phonetic: "/'ju:nıfɔ:m/", pos: "adj.", zh: "均匀的", collocations: ["uniform beam weight (均匀横梁重力)"], example_en: "A uniform beam's weight acts exactly at its midpoint position.", example_zh: "均匀梁的自身重力正好作用在其几何中点位置。", img: "fa-grip-lines" },
+      { id: 154, chapter: 8, word: "tilting", phonetic: "/'tıltıŋ/", pos: "n.", zh: "倾斜/倾覆", collocations: ["on the verge of tilting (在倾斜的边缘/即倾平衡)"], example_en: "The beam is on the verge of tilting, so reaction at one support is zero.", example_zh: "横梁处于即倾状态，因此一侧支撑处的反作用力下降为零。", img: "fa-angles-up" },
+      { id: 155, chapter: 8, word: "beam", phonetic: "/bi:m/", pos: "n.", zh: "横梁/梁", collocations: ["support the beam (支撑横梁)", "uniform horizontal beam (均匀水平横梁)"], example_en: "A uniform horizontal beam AB of mass 12 kg balances on two supports.", example_zh: "一根质量为 12 kg 的均匀水平横梁 AB 平衡在两个支撑点上。", img: "fa-bars" }
+    ];
+
+    // --- 2. LONGMAN 3000 HIGH FREQUENCY SELECTED DATABASE (60 Core Active Words) ---
+    const longmanData = [
+      { id: 1, chapter: 1, word: "abandon", phonetic: "/ə'bændən/", pos: "v.", zh: "放弃，遗弃", s: "S3", w: "W3", collocations: ["abandon plans/attempts (放弃计划/尝试)", "completely abandon (彻底遗弃)"], example_en: "The broken car was abandoned by the side of the road.", example_zh: "那辆坏掉的车被抛弃在路边。", img: "fa-car-burst" },
+      { id: 2, chapter: 1, word: "ability", phonetic: "/ə'bıləti/", pos: "n.", zh: "能力，本领", s: "S2", w: "W1", collocations: ["have the ability to do sth (有做某事的能力)", "natural/outstanding ability (天赋/杰出的能力)"], example_en: "She has shown outstanding ability in handling complex problems.", example_zh: "她在处理复杂问题时展现出了杰出的能力。", img: "fa-brain" },
+      { id: 3, chapter: 1, word: "able", phonetic: "/'eıbl/", pos: "adj.", zh: "能够，有能力的", s: "S1", w: "W1", collocations: ["be able to cope (能够应付)", "perfectly able (完全能够)"], example_en: "Will you be able to come to the meeting tomorrow afternoon?", example_zh: "你明天下午能来参加会议吗？", img: "fa-thumbs-up" },
+      { id: 4, chapter: 1, word: "about", phonetic: "/ə'baʊt/", pos: "prep., adv.", zh: "关于，大约", s: "S1", w: "W1", collocations: ["know about sth (了解某事)", "just about finished (几乎已经完成了)"], example_en: "I was thinking about how we can improve our working strategy.", example_zh: "我一直在考虑我们要如何改进工作策略。", img: "fa-circle-question" },
+      { id: 5, chapter: 1, word: "above", phonetic: "/ə'bʌv/", pos: "adv., prep.", zh: "在...之上，高于", s: "S2", w: "W1", collocations: ["mentioned above (上文提及的)", "above average (高于平均水平)"], example_en: "The temperature today remains above average for this season.", example_zh: "今天的气温仍高于这个季节的平均水平。", img: "fa-arrow-trend-up" },
+      { id: 6, chapter: 1, word: "abroad", phonetic: "/ə'brɔːd/", pos: "adv.", zh: "在国外，海外", s: "S2", w: "W3", collocations: ["go/travel abroad (出国/去国外旅游)", "study/work abroad (留学/在国外工作)"], example_en: "She decided to study abroad to experience different cultural environments.", example_zh: "她决定出国留学，以便体验不同的文化环境。", img: "fa-plane" },
+      { id: 7, chapter: 1, word: "absence", phonetic: "/'æbsəns/", pos: "n.", zh: "缺席，缺乏", s: "S3", w: "W2", collocations: ["in the absence of sth (在缺乏某物的情况下)", "absence from work/school (矿工/旷课)"], example_en: "In the absence of concrete evidence, we cannot declare him guilty.", example_zh: "在缺乏具体证据的情况下，我们不能宣判他有罪。", img: "fa-user-slash" },
+      { id: 8, chapter: 1, word: "absolute", phonetic: "/'æbsəluːt/", pos: "adj.", zh: "绝对的，完全的", s: "S2", w: "W3", collocations: ["absolute confidence/trust (绝对的信心/信任)", "an absolute disaster (彻底的灾难)"], example_en: "I have absolute confidence that our team will accomplish the task.", example_zh: "我绝对有信心我们的团队能完成这项任务。", img: "fa-shield-halved" },
+      { id: 9, chapter: 1, word: "abuse", phonetic: "/ə'bjuːs/", pos: "n., v.", zh: "滥用，辱骂，虐待", s: "S2", w: "W3", collocations: ["abuse of power (滥用权力)", "alcohol/drug abuse (酗酒/吸毒)"], example_en: "The manager was accused of severe abuse of his administrative authority.", example_zh: "该经理被指控严重滥用行政权力。", img: "fa-gavel" },
+      { id: 10, chapter: 1, word: "academic", phonetic: "/ˌækə'demık/", pos: "adj.", zh: "学术的", s: "", w: "W2", collocations: ["academic achievement/performance (学术成就/表现)", "academic career (学术生涯)"], example_en: "The school awards scholarships to students with high academic standards.", example_zh: "这所学校向具有高学术水准的学生颁发奖学金。", img: "fa-award" },
+      { id: 11, chapter: 1, word: "accept", phonetic: "/ək'sept/", pos: "v.", zh: "接受，承认", s: "S1", w: "W1", collocations: ["accept responsibility/blame (承担责任/责备)", "accept an offer/invitation (接受提议/邀请)"], example_en: "They finally agreed to accept our modified contract terms.", example_zh: "他们最终同意接受我们修改后的合同条款。", img: "fa-circle-check" },
+      { id: 12, chapter: 1, word: "accident", phonetic: "/'æksıdənt/", pos: "n.", zh: "事故，车祸，意外", s: "S2", w: "W2", collocations: ["car/traffic accident (车祸/交通事故)", "by accident (偶然地)"], example_en: "The serious traffic accident caused a long delay on the highway.", example_zh: "严重的交通事故在高速公路上造成了长时间的拥拥堵。", img: "fa-triangle-exclamation" },
+      { id: 13, chapter: 1, word: "accompany", phonetic: "/ə'kʌmpəni/", pos: "v.", zh: "陪同，伴随", s: "", w: "W2", collocations: ["be accompanied by (由...伴随/陪同)", "accompany the guest (陪同客人)"], example_en: "Children under the age of twelve must be accompanied by an adult.", example_zh: "12岁以下的孩子必须由大人陪同。", img: "fa-people-group" },
+      { id: 14, chapter: 1, word: "achieve", phonetic: "/ə'tʃiːv/", pos: "v.", zh: "实现，达到", s: "S2", w: "W1", collocations: ["achieve success/goal (取得成功/达到目标)", "achieve results (取得成果)"], example_en: "You can achieve anything if you work hard enough.", example_zh: "只要你足够努力，你可以实现任何事情。", img: "fa-trophy" },
+      { id: 15, chapter: 1, word: "acid", phonetic: "/'æsıd/", pos: "n., adj.", zh: "酸，酸性的", s: "", w: "W3", collocations: ["acid rain (酸雨)", "citric acid (柠檬酸)"], example_en: "Acid rain poses a significant threat to regional forest environments.", example_zh: "酸雨对该区域的森林环境造成了重大威胁。", img: "fa-flask" },
+      { id: 16, chapter: 1, word: "acquire", phonetic: "/ə'kwaıə/", pos: "v.", zh: "获得，购得，学到", s: "", w: "W2", collocations: ["acquire skills/knowledge (获得技能/学到知识)", "acquire a company (收购公司)"], example_en: "Through hard study, he acquired a comprehensive understanding of engineering.", example_zh: "通过刻苦学习，他获得了对工程学的全面理解。", img: "fa-book" },
+      { id: 17, chapter: 1, word: "action", phonetic: "/'ækʃn/", pos: "n.", zh: "行动，动作，诉讼", s: "S1", w: "W1", collocations: ["take action (采取行动)", "industrial action (罢工行动)"], example_en: "We need to take immediate action to resolve this critical issue.", example_zh: "我们需要立即采取行动来解决这个关键问题。", img: "fa-bolt-lightning" },
+      { id: 18, chapter: 1, word: "adapt", phonetic: "/ə'dæpt/", pos: "v.", zh: "使适应，改编", s: "", w: "W3", collocations: ["adapt to a new environment (适应新环境)", "easily adapt (容易适应)"], example_en: "It took several months for him to adapt to studying abroad.", example_zh: "他花了几个月的时间才适应国外的学习生活。", img: "fa-sliders" },
+      { id: 19, chapter: 1, word: "adjust", phonetic: "/ə'dʒʌst/", pos: "v.", zh: "调整，调节", s: "", w: "W3", collocations: ["adjust the settings (调整设置)", "adjust to changes (适应变化)"], example_en: "You can adjust the voice speed using the range selector slider.", example_zh: "你可以使用范围选择器滑块来调节语速。", img: "fa-gear" },
+      { id: 20, chapter: 1, word: "admire", phonetic: "/əd'maıə/", pos: "v.", zh: "钦佩，欣赏", s: "S3", w: "", collocations: ["greatly admire (极度钦佩)", "admire sb's courage/determination (钦佩某人的勇气/决心)"], example_en: "I really admire her determination to achieve her ambitions.", example_zh: "我真的很钦佩她实现自己抱负的决心。", img: "fa-star-of-life" },
+      { id: 21, chapter: 1, word: "adopt", phonetic: "/ə'dɒpt/", pos: "v.", zh: "采用，采纳，收养", s: "S3", w: "W2", collocations: ["adopt a strategy/approach (采纳策略/方法)", "adopt a child (收养孩子)"], example_en: "The institution decided to adopt a new strategy for community development.", example_zh: "该机构决定采用一种新的社区发展策略。", img: "fa-check-double" },
+      { id: 22, chapter: 1, word: "adult", phonetic: "/'ædʌlt/", pos: "n., adj.", zh: "成年人，成年的", s: "S2", w: "W2", collocations: ["accompanied by an adult (由成年人陪同)", "adult education (成人教育)"], example_en: "The ticket price is lower for kids than it is for an adult.", example_zh: "儿童的票价比成年人要低。", img: "fa-user-tie" },
+      { id: 23, chapter: 1, word: "advance", phonetic: "/əd'vɑːns/", pos: "n., v.", zh: "前进，进展，预付款", s: "S2", w: "W2", collocations: ["in advance (提前/预先)", "scientific advances (科学进展)"], example_en: "You need to book your hotel accommodation well in advance.", example_zh: "你需要提前很久预订好你的酒店住宿。", img: "fa-arrow-right-long" },
+      { id: 24, chapter: 1, word: "advantage", phonetic: "/əd'vɑːntıdʒ/", pos: "n.", zh: "优势，有利条件", s: "S2", w: "W1", collocations: ["take advantage of (利用...)", "gain an unfair advantage (获得不公平的优势)"], example_en: "Knowing standard English collocations gives learners a huge advantage.", example_zh: "掌握标准英语搭配给学习者带来了巨大的优势。", img: "fa-circle-arrow-up" },
+      { id: 25, chapter: 1, word: "advice", phonetic: "/əd'vaıs/", pos: "n.", zh: "建议，意见", s: "S2", w: "W2", collocations: ["ask for advice (征求建议)", "follow/take sb's advice (听取某人的建议)"], example_en: "The teacher gave me some very useful advice on learning vocabulary.", example_zh: "老师在词汇学习上给了我一些非常实用的建议。", img: "fa-comment-dots" },
+      { id: 26, chapter: 1, word: "affect", phonetic: "/ə'fekt/", pos: "v.", zh: "影响，感染", s: "S2", w: "W1", collocations: ["seriously/badly affect (严重影响)", "affect the outcome (影响结果)"], example_en: "Our emotional attitude can directly affect our active memory efficiency.", example_zh: "我们的情绪态度会直接影响我们主动记忆的效率。", img: "fa-wave-square" },
+      { id: 27, chapter: 1, word: "afford", phonetic: "/ə'fɔːd/", pos: "v.", zh: "买得起，承担得起", s: "S1", w: "W3", collocations: ["can afford to buy sth (买得起某物)", "can ill afford to (根本承担不起)"], example_en: "I don't think we can afford to buy such an expensive laptop.", example_zh: "我认为我们买不起这么昂贵的笔记本电脑。", img: "fa-credit-card" },
+      { id: 28, chapter: 1, word: "afraid", phonetic: "/ə'freıd/", pos: "adj.", zh: "害怕的，担心的", s: "S1", w: "W2", collocations: ["be afraid of sth (害怕某事)", "be afraid to do sth (不敢做某事)"], example_en: "Don't be afraid to make mistakes; they are essential for learning.", example_zh: "不要害怕犯错，犯错对学习至关重要。", img: "fa-ghost" },
+      { id: 29, chapter: 1, word: "agent", phonetic: "/'eıdʒənt/", pos: "n.", zh: "代理人，代理商，特工", s: "S3", w: "W2", collocations: ["travel/estate agent (旅行社/地产中介)", "authorized agent (授权代理商)"], example_en: "The local estate agent helped them find a beautiful new house.", example_zh: "当地的房产中介帮他们找到了一栋漂亮的新房子。", img: "fa-briefcase" },
+      { id: 30, chapter: 1, word: "agree", phonetic: "/ə'ɡriː/", pos: "v.", zh: "同意，赞成，一致", s: "S1", w: "W1", collocations: ["agree with sb/sth (赞同某人/某事)", "agree to do sth (同意做某事)"], example_en: "I entirely agree with your suggestion to use active recall methods.", example_zh: "我完全赞同你采用主动召回记忆法的建议。", img: "fa-handshake" },
+      { id: 31, chapter: 1, word: "agreement", phonetic: "/ə'ɡriːmənt/", pos: "n.", zh: "协议，协定，一致同意", s: "S2", w: "W1", collocations: ["reach an agreement (达成协议)", "signed agreement (签署的协定)"], example_en: "They finally reached an agreement after a long and intense discussion.", example_zh: "在一场漫长而激烈的讨论后，他们终于达成了协议。", img: "fa-file-signature" },
+      { id: 32, chapter: 1, word: "ahead", phonetic: "/ə'hed/", pos: "adv.", zh: "在前面，提前，领先", s: "S1", w: "W2", collocations: ["ahead of schedule (提前于计划)", "straight ahead (直行在前方)"], example_en: "We finished all our task preparations well ahead of schedule.", example_zh: "我们在计划表之前非常顺利地完成了所有任务准备。", img: "fa-compass" },
+      { id: 33, chapter: 1, word: "aim", phonetic: "/eım/", pos: "n., v.", zh: "目标，旨在，瞄准", s: "S2", w: "W2", collocations: ["aim to do sth (旨在做某事)", "main/primary aim (主要目标)"], example_en: "The primary aim of this system is to help you master collocations.", example_zh: "本系统的主要目的在于帮助您掌握搭配词汇。", img: "fa-bullseye" },
+      { id: 34, chapter: 1, word: "air", phonetic: "/eı/", pos: "n.", zh: "空气，天空，广播", s: "S1", w: "W1", collocations: ["fresh air (新鲜空气)", "by air (乘飞机/空运)"], example_en: "I need to open the window to let in some fresh air.", example_zh: "我需要打开窗户，以便放一些新鲜空气进来。", img: "fa-wind" },
+      { id: 35, chapter: 1, word: "aircraft", phonetic: "/'eəkrɑːft/", pos: "n.", zh: "航空器，飞机", s: "S2", w: "W2", collocations: ["civil/military aircraft (民航机/军用机)", "aircraft pilot (飞机飞行员)"], example_en: "The military aircraft landed safely at the airport during the storm.", example_zh: "暴风雨期间，那架军用飞机安全地降落在机场。", img: "fa-plane-departure" },
+      { id: 36, chapter: 1, word: "alarm", phonetic: "/ə'lɑːm/", pos: "n.", zh: "警报，警报器，惊恐", s: "S2", w: "", collocations: ["fire/burglar alarm (火灾/防盗警报)", "sound the alarm (拉响警报)"], example_en: "The fire alarm suddenly rang, and everyone evacuated the library.", example_zh: "火灾警报器突然响了，每个人都撤离了图书馆。", img: "fa-bell" },
+      { id: 37, chapter: 1, word: "alcohol", phonetic: "/'ælkəhɒl/", pos: "n.", zh: "酒精，酒", s: "", w: "W3", collocations: ["alcohol consumption (饮酒/酒精摄入)", "contains alcohol (含有酒精)"], example_en: "Drivers must avoid any alcohol consumption before driving a car.", example_zh: "驾驶员在开车前必须避免任何饮酒行为。", img: "fa-wine-glass" },
+      { id: 38, chapter: 1, word: "alive", phonetic: "/ə'laıv/", pos: "adj.", zh: "活着的，有活力的", s: "S2", w: "W3", collocations: ["keep sth alive (让某事保持生机)", "still alive (还活着)"], example_en: "The doctors did everything they could to keep the patient alive.", example_zh: "医生们竭尽所能来确保这位病人活下来。", img: "fa-heart-pulse" },
+      { id: 39, chapter: 1, word: "allow", phonetic: "/ə'laʊ/", pos: "v.", zh: "允许，准许", s: "S1", w: "W1", collocations: ["allow sb to do sth (允许某人做某事)", "strictly allowed (严格准许)"], example_en: "My parents do not allow me to stay out late at night.", example_zh: "我的父母不允许我在外面呆得很晚。", img: "fa-unlock" },
+      { id: 40, chapter: 1, word: "almost", phonetic: "/'ɔːlməʊst/", pos: "adv.", zh: "几乎，差不多", s: "S1", w: "W1", collocations: ["almost impossible (几乎不可能)", "almost completely (差不多完全)"], example_en: "It is almost impossible to learn all English words in a week.", example_zh: "在在一周内学完所有英语单词是几乎不可能的事。", img: "fa-hourglass-half" },
+      { id: 41, chapter: 1, word: "able", phonetic: "/'eıbl/", pos: "adj.", zh: "能够，有能力的", s: "S1", w: "W1", collocations: ["be able to cope (能够应付)", "perfectly able (完全能够)"], example_en: "Will you be able to come to the meeting tomorrow afternoon?", example_zh: "你明天下午能来参加会议吗？", img: "fa-thumbs-up" },
+      { id: 42, chapter: 1, word: "about", phonetic: "/ə'baʊt/", pos: "prep., adv.", zh: "关于，大约", s: "S1", w: "W1", collocations: ["know about sth (了解某事)", "just about finished (几乎已经完成了)"], example_en: "I was thinking about how we can improve our working strategy.", example_zh: "我一直在考虑我们要如何改进工作策略。", img: "fa-circle-question" },
+      { id: 43, chapter: 1, word: "above", phonetic: "/ə'bʌv/", pos: "adv., prep.", zh: "在...之上，高于", s: "S2", w: "W1", collocations: ["mentioned above (上文提及的)", "above average (高于平均水平)"], example_en: "The temperature today remains above average for this season.", example_zh: "今天的气温仍高于这个季节的平均水平。", img: "fa-arrow-trend-up" },
+      { id: 44, chapter: 1, word: "abroad", phonetic: "/ə'brɔːd/", pos: "adv.", zh: "在国外，海外", s: "S2", w: "W3", collocations: ["go/travel abroad (出国/去国外旅游)", "study/work abroad (留学/在国外工作)"], example_en: "She decided to study abroad to experience different cultural environments.", example_zh: "她决定出国留学，以便体验不同的文化环境。", img: "fa-plane" },
+      { id: 45, chapter: 1, word: "absence", phonetic: "/'æbsəns/", pos: "n.", zh: "缺席，缺乏", s: "S3", w: "W2", collocations: ["in the absence of sth (在缺乏某物的情况下)", "absence from work/school (矿工/旷课)"], example_en: "In the absence of concrete evidence, we cannot declare him guilty.", example_zh: "在缺乏具体证据的情况下，我们不能宣判他有罪。", img: "fa-user-slash" },
+      { id: 46, chapter: 1, word: "absolute", phonetic: "/'æbsəluːt/", pos: "adj.", zh: "绝对的，完全的", s: "S2", w: "W3", collocations: ["absolute confidence/trust (绝对的信心/信任)", "an absolute disaster (彻底的灾难)"], example_en: "I have absolute confidence that our team will accomplish the task.", example_zh: "我绝对有信心我们的团队能完成这项任务。", img: "fa-shadow-halved" },
+      { id: 47, chapter: 1, word: "abuse", phonetic: "/ə'bju:s/", pos: "n.", zh: "滥用，虐待", s: "S2", w: "W3", collocations: ["drug abuse (药物滥用)", "child abuse (虐待儿童)"], example_en: "The system is designed to prevent any potential abuse of user data.", example_zh: "该系统的设计旨在防止任何潜在的用户数据滥用行为。", img: "fa-hand-fist" },
+      { id: 48, chapter: 1, word: "academic", phonetic: "/ˌækə'demık/", pos: "adj.", zh: "学术的", s: "", w: "W2", collocations: ["academic standards (学术标准)", "academic achievement (学术成就)"], example_en: "She received an award for her outstanding academic performance.", example_zh: "她因杰出的学术表现获得了奖励。", img: "fa-graduation-cap" },
+      { id: 49, chapter: 1, word: "accept", phonetic: "/ək'sept/", pos: "v.", zh: "接受，承认", s: "S1", w: "W1", collocations: ["accept an offer (接受提议)", "accept responsibility (承担责任)"], example_en: "I am pleased to accept your invitation to the annual conference.", example_zh: "我很荣幸接受您参加年会邀请。", img: "fa-square-check" },
+      { id: 50, chapter: 1, word: "accident", phonetic: "/'æksıdənt/", pos: "n.", zh: "意外，事故", s: "S2", w: "W2", collocations: ["by accident (偶然)", "car accident (车祸)"], example_en: "I found this beautiful book completely by accident in the library.", example_zh: "我在图书馆完全是偶然发现了这本好书。", img: "fa-car-crash" },
+      { id: 51, chapter: 1, word: "accompany", phonetic: "/ə'kʌmpəni/", pos: "v.", zh: "伴随，陪同", s: "", w: "W2", collocations: ["be accompanied by (由...陪伴)", "accompany the guest (陪同客人)"], example_en: "Strong winds usually accompany the summer storm.", example_zh: "狂风通常伴随着夏日的暴风雨。", img: "fa-people-arrows" },
+      { id: 52, chapter: 1, word: "achieve", phonetic: "/ə'tʃi:v/", pos: "v.", zh: "实现，达到", s: "S2", w: "W1", collocations: ["achieve success (获得成功)", "achieve results (取得效果)"], example_en: "We can achieve our goals through persistent study every day.", example_zh: "通过每天坚持不懈的学习，我们一定可以实现目标。", img: "fa-trophy" },
+      { id: 53, chapter: 1, word: "acid", phonetic: "/'æsıd/", pos: "n.", zh: "酸，酸性物质", s: "", w: "W3", collocations: ["citric acid (柠檬酸)", "acid rain (酸雨)"], example_en: "The student added a few drops of acid to the chemical sample.", example_zh: "学生在化学样品中滴入了几滴酸液。", img: "fa-flask" },
+      { id: 54, chapter: 1, word: "acquire", phonetic: "/ə'kwaıə/", pos: "v.", zh: "获得，学到", s: "", w: "W2", collocations: ["acquire knowledge (获得知识)", "acquire a skill (学得一项技能)"], example_en: "It is important to acquire standard pronunciation early in study.", example_zh: "及早学得标准发音在语言学习中非常重要。", img: "fa-lightbulb" },
+      { id: 55, chapter: 1, word: "action", phonetic: "/'ækʃn/", pos: "n.", zh: "行动，动作", s: "S1", w: "W1", collocations: ["take action (采取行动)", "in action (在运转中)"], example_en: "The government promised to take immediate action against pollution.", example_zh: "政府承诺立即采取行动整治污染问题。", img: "fa-play" },
+      { id: 56, chapter: 1, word: "adapt", phonetic: "/ə'dæpt/", pos: "v.", zh: "使适应，改编", s: "", w: "W3", collocations: ["adapt to sth (适应某事)", "easily adapt (轻松适应)"], example_en: "Some animals can easily adapt to extreme environment changes.", example_zh: "有些动物可以轻松适应极端的环境变化。", img: "fa-sliders" },
+      { id: 57, chapter: 1, word: "adjust", phonetic: "/ə'dʒʌst/", pos: "v.", zh: "调整，调节", s: "", w: "W3", collocations: ["adjust setting (调整设置)", "adjust rate (调整速率)"], example_en: "You can adjust the playback rate to match your listening speed.", example_zh: "您可以调节播放速率以配合您的听力速度。", img: "fa-gears" },
+      { id: 58, chapter: 1, word: "admire", phonetic: "/əd'maıə/", pos: "v.", zh: "钦佩，赏识", s: "S3", w: "", collocations: ["greatly admire (由衷钦佩)", "admire courage (赞赏勇气)"], example_en: "I greatly admire your persistence in tracking your memory progress.", example_zh: "我十分钦佩您在跟踪记忆进度方面的坚持不懈。", img: "fa-heart" },
+      { id: 59, chapter: 1, word: "adopt", phonetic: "/ə'adopt/", pos: "v.", zh: "采用，收养", s: "S3", w: "W2", collocations: ["adopt a strategy (采取策略)", "adopt an approach (采用方法)"], example_en: "We should adopt the active learning approach to study science.", example_zh: "我们应当采用主动学习的方法来研究科学。", img: "fa-square-check" },
+      { id: 60, chapter: 1, word: "apparent", phonetic: "/ə'pærənt/", pos: "adj.", zh: "明显的，显而易见的", s: "", w: "W2", collocations: ["for no apparent reason (无明显原因)", "apparent advantage (表面的优势)"], example_en: "The effect of the learning curve became apparent after one week.", example_zh: "学习曲线的效果在一周后变得清晰显而易见。", img: "fa-eye" }
+    ];
+
+    // M1 Chapter Map Names
+    const m1Chapters = {
+      1: "Ch 1: 力学基础与建模建模",
+      2: "Ch 2: 直线运动与图像 SUVAT",
+      3: "Ch 3: 向量几何与方位角",
+      4: "Ch 4: 牛顿定律与连接体拉力",
+      5: "Ch 5: 斜面滑动与摩擦力极限",
+      6: "Ch 6: 冲量与动量守恒定理",
+      7: "Ch 7: 共面静力平衡分析",
+      8: "Ch 8: 刚体力矩平衡与支点"
+    };
+
+    // Global configurations states
+    let currentLibrary = localStorage.getItem('m1_current_library') || 'm1'; // 'm1' or 'longman'
+    let currentTab = 'list';
+    
+    // Filters States
+    let m1ChapterFilter = 'all';
+    let lmMarkerFilter = 'all';
+    let lmLetterFilter = 'all';
+    let searchQuery = '';
+    let onlyStarred = false;
+
+    // Local Storage states (prefix logic dynamically used)
+    let starredWords = [];
+    let learnedWords = [];
+    let ebbinghausSchedule = [];
+
+    // Voice Text-To-Speech engine settings
+    let selectedLang = localStorage.getItem('m1_voice_accent') || 'en-GB';
+    let playbackRate = parseFloat(localStorage.getItem('m1_voice_rate')) || 1.0;
+
+    // Flashcard variables
+    let activeCardIndex = 0;
+    let cardIsFlipped = false;
+
+    // Quiz states
+    let quizQuestions = [];
+    let currentQuizIndex = 0;
+    let quizScore = 0;
+    let quizTotalNum = 10;
+    let quizSelectedRange = 'all';
+
+    // custom callback wrapper for confirmations
+    let activeConfirmCallback = null;
+
+    // Ebbinghaus intervals definitions (milliseconds)
+    const ebbinghausIntervals = [
+      0,                       // level placeholder
+      20 * 60 * 1000,          // Level 1: 20 mins
+      1 * 60 * 60 * 1000,       // Level 2: 1 hour
+      9 * 60 * 60 * 1000,       // Level 3: 9 hours
+      24 * 60 * 60 * 1000,      // Level 4: 24 hours
+      2 * 24 * 60 * 60 * 1000,  // Level 5: 2 days (48h)
+      6 * 24 * 60 * 60 * 1000,  // Level 6: 6 days
+      15 * 24 * 60 * 60 * 1000  // Level 7: 15 days
+    ];
+
+    // Start System Bootloader
+    window.onload = function() {
+      initTheme();
+      initAppTitle();
+      loadActiveLibraryData();
+      renderLetterSelectors();
+      updateProgressUI();
+      renderVocabList();
+      populateQuizSetup();
+      setupKeyboardShortcuts();
+
+      document.getElementById('voice-accent-select').value = selectedLang;
+      document.getElementById('voice-speed').value = playbackRate;
+      document.getElementById('speed-val').textContent = playbackRate.toFixed(1);
+    }
+
+    // --- SYSTEM TOAST ---
+    function showToast(message, isSuccess = true) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.textContent = message;
+      if (isSuccess) {
+        toastIcon.className = "fa-solid fa-circle-check text-emerald-500 text-sm";
+      } else {
+        toastIcon.className = "fa-solid fa-circle-exclamation text-rose-500 text-sm";
+      }
+
+      toast.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    // --- MODERN CUSTOM CONFIRM OVERLAY MODAL ---
+    function openConfirmModal(title, msg, onConfirm) {
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-message').textContent = msg;
+      document.getElementById('confirm-modal').classList.remove('hidden');
+      activeConfirmCallback = onConfirm;
+    }
+
+    function closeConfirmModal(isYes) {
+      document.getElementById('confirm-modal').classList.add('hidden');
+      if (isYes && activeConfirmCallback) {
+        activeConfirmCallback();
+      }
+      activeConfirmCallback = null;
+    }
+
+    // Bind custom modal execute button
+    document.getElementById('confirm-yes-btn').onclick = () => closeConfirmModal(true);
+
+    // --- DARK / LIGHT THEME CONTROLS ---
+    function initTheme() {
+      if (localStorage.getItem('m1_theme') === 'dark' || (!('m1_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.getElementById('theme-icon').className = 'fa-solid fa-sun text-lg text-amber-500';
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('theme-icon').className = 'fa-solid fa-moon text-lg text-slate-600';
+      }
+    }
+
+    function toggleDarkMode() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('m1_theme', 'light');
+        document.getElementById('theme-icon').className = 'fa-solid fa-moon text-lg text-slate-600';
+        showToast("已切换至明亮主题 ☀️");
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('m1_theme', 'dark');
+        document.getElementById('theme-icon').className = 'fa-solid fa-sun text-lg text-amber-500';
+        showToast("已切换至深色护眼主题 🌙");
+      }
+    }
+
+    // --- APP TITLE CUSTOMIZATION ENGINE ---
+    function initAppTitle() {
+      const savedTitle = localStorage.getItem('m1_custom_app_title') || 'M1 & Longman Dual';
+      const savedSubtitle = localStorage.getItem('m1_custom_app_subtitle') || '双语智能抗遗忘系统';
+      
+      document.getElementById('brand-title').textContent = savedTitle;
+      document.getElementById('brand-subtitle').textContent = savedSubtitle;
+      document.title = `${savedTitle} - ${savedSubtitle}`;
+      
+      const inputTitle = document.getElementById('setting-app-title');
+      const inputSubtitle = document.getElementById('setting-app-subtitle');
+      if (inputTitle) inputTitle.value = savedTitle;
+      if (inputSubtitle) inputSubtitle.value = savedSubtitle;
+    }
+
+    function saveCustomTitle() {
+      const inputTitle = document.getElementById('setting-app-title').value.trim();
+      const inputSubtitle = document.getElementById('setting-app-subtitle').value.trim();
+      
+      if (!inputTitle) {
+        showToast("主标题不能为空哦", false);
+        return;
+      }
+      
+      localStorage.setItem('m1_custom_app_title', inputTitle);
+      localStorage.setItem('m1_custom_app_subtitle', inputSubtitle || '双语智能抗遗忘系统');
+      
+      initAppTitle();
+      showToast("✨ 系统名称和标题更新成功！已同步至云端与本地！");
+    }
+
+    function restoreDefaultTitle() {
+      localStorage.removeItem('m1_custom_app_title');
+      localStorage.removeItem('m1_custom_app_subtitle');
+      initAppTitle();
+      showToast("🔄 已恢复为默认系统名称标题");
+    }
+
+    // --- MULTI-LIBRARY CONTROLLERS ---
+    function loadActiveLibraryData() {
+      const prefix = currentLibrary + '_';
+      starredWords = JSON.parse(localStorage.getItem(prefix + 'starred_words')) || [];
+      learnedWords = JSON.parse(localStorage.getItem(prefix + 'learned_words')) || [];
+      ebbinghausSchedule = JSON.parse(localStorage.getItem(prefix + 'ebbinghaus_schedule')) || [];
+
+      // Update switcher layouts
+      const btnM1 = document.getElementById('lib-btn-m1');
+      const btnLongman = document.getElementById('lib-btn-longman');
+
+      if (currentLibrary === 'm1') {
+        btnM1.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-300 bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 shadow-sm border border-sky-100 dark:border-sky-950";
+        btnM1.querySelector('i:last-child').classList.remove('opacity-0');
+        btnLongman.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-300 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/40";
+        btnLongman.querySelector('i:last-child').classList.add('opacity-0');
+
+        document.getElementById('filter-m1-row').classList.remove('hidden');
+        document.getElementById('filter-longman-row').classList.add('hidden');
+        document.getElementById('library-title-label').textContent = "Edexcel M1 机械力学词汇";
+      } else {
+        btnLongman.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-300 bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 shadow-sm border border-sky-100 dark:border-sky-950";
+        btnLongman.querySelector('i:last-child').classList.remove('opacity-0');
+        btnM1.className = "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-300 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/40";
+        btnM1.querySelector('i:last-child').classList.add('opacity-0');
+
+        document.getElementById('filter-m1-row').classList.add('hidden');
+        document.getElementById('filter-longman-row').classList.remove('hidden');
+        document.getElementById('library-title-label').textContent = "Longman 3000 高频学术词";
+      }
+
+      resetAllFilters();
+    }
+
+    function switchLibrary(libType) {
+      if (currentLibrary === libType) return;
+      currentLibrary = libType;
+      localStorage.setItem('m1_current_library', libType);
+
+      loadActiveLibraryData();
+      updateProgressUI();
+      populateQuizSetup();
+
+      // Refresh corresponding screens
+      if (currentTab === 'list') {
+        renderVocabList();
+      } else if (currentTab === 'ebbinghaus') {
+        renderEbbinghausScreen();
+      } else if (currentTab === 'flashcard') {
+        activeCardIndex = 0;
+        initFlashcardDeck();
+      } else if (currentTab === 'quiz') {
+        resetQuiz();
+      } else if (currentTab === 'stats') {
+        updateProgressUI();
+      }
+
+      showToast(`已成功载入 ${libType === 'm1' ? 'Edexcel M1 机械力学' : 'Longman 3000 高频'} 专业词库！`);
+    }
+
+    function getActiveDataset() {
+      return currentLibrary === 'm1' ? m1Data : longmanData;
+    }
+
+    function saveActiveProgressData() {
+      const prefix = currentLibrary + '_';
+      localStorage.setItem(prefix + 'starred_words', JSON.stringify(starredWords));
+      localStorage.setItem(prefix + 'learned_words', JSON.stringify(learnedWords));
+      localStorage.setItem(prefix + 'ebbinghaus_schedule', JSON.stringify(ebbinghausSchedule));
+    }
+
+    function resetAllFilters() {
+      m1ChapterFilter = 'all';
+      lmMarkerFilter = 'all';
+      lmLetterFilter = 'all';
+      searchQuery = '';
+      onlyStarred = false;
+      document.getElementById('global-search').value = '';
+
+      // Reset markers state indicators
+      filterByChapter('all');
+      filterByMarker('all');
+      filterByLetter('all');
+    }
+
+    // --- TEXT TO SPEECH CONTROLS ---
+    function playAudio(textToSpeak) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = selectedLang;
+        utterance.rate = playbackRate;
+
+        const voices = window.speechSynthesis.getVoices();
+        let voiceObj = voices.find(v => v.lang.startsWith(selectedLang));
+        if (voiceObj) {
+          utterance.voice = voiceObj;
+        }
+
+        window.speechSynthesis.speak(utterance);
+      } else {
+        showToast("您的浏览器不支持语音朗读发音", false);
+      }
+    }
+
+    function playBilingualAudio(enText, zhText) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        
+        // English sentence speaker
+        const enUtterance = new SpeechSynthesisUtterance(enText);
+        enUtterance.lang = selectedLang;
+        enUtterance.rate = playbackRate;
+
+        // Chinese translation speaker
+        enUtterance.onend = function() {
+          const zhUtterance = new SpeechSynthesisUtterance(zhText);
+          zhUtterance.lang = "zh-CN";
+          zhUtterance.rate = 1.0;
+          window.speechSynthesis.speak(zhUtterance);
+        };
+
+        window.speechSynthesis.speak(enUtterance);
+      }
+    }
+
+    // --- SYSTEM PROGRESS METRICS ENGINE ---
+    function updateProgressUI() {
+      const dataset = getActiveDataset();
+      const totalCount = dataset.length;
+      const masteredCount = learnedWords.length;
+      const pct = totalCount > 0 ? Math.round((masteredCount / totalCount) * 100) : 0;
+
+      // Update sidebar tracking bar values
+      document.getElementById('overall-progress-text').textContent = `${pct}% (${masteredCount}/${totalCount})`;
+      document.getElementById('overall-progress-bar').style.width = `${pct}%`;
+
+      // Update Statistics screen metrics
+      document.getElementById('stats-learned-count').textContent = masteredCount;
+      document.getElementById('stats-learned-pct').textContent = pct;
+      document.getElementById('stats-starred-count').textContent = starredWords.length;
+
+      const fullyMastered = ebbinghausSchedule.filter(s => s.level > 7).length;
+      document.getElementById('stats-ebg-mastered-count').textContent = fullyMastered;
+
+      // Calculate and update Ebbinghaus active Badge trigger
+      const now = Date.now();
+      const dueCount = ebbinghausSchedule.filter(s => s.level <= 7 && s.nextReviewTime <= now).length;
+      const badge = document.getElementById('ebbinghaus-badge');
+      if (dueCount > 0) {
+        badge.textContent = dueCount;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    // --- ==================== SCREEN 1: WORD LIST CONTROLLERS ==================== ---
+    function renderLetterSelectors() {
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+      const container = document.getElementById('letter-selector-row');
+      container.innerHTML = '';
+
+      // All jumper option
+      const allBtn = document.createElement('button');
+      allBtn.id = 'letter-btn-all';
+      allBtn.onclick = () => filterByLetter('all');
+      allBtn.className = "px-2.5 py-1 text-xs font-bold rounded-lg transition-all bg-sky-500 text-white shadow-sm";
+      allBtn.textContent = "全部";
+      container.appendChild(allBtn);
+
+      letters.forEach(letter => {
+        const count = longmanData.filter(v => v.word.toUpperCase().startsWith(letter)).length;
+        if (count > 0) {
+          const btn = document.createElement('button');
+          btn.id = `letter-btn-${letter}`;
+          btn.onclick = () => filterByLetter(letter);
+          btn.className = "px-2.5 py-1 text-xs font-semibold rounded-lg transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800";
+          btn.textContent = `${letter} (${count})`;
+          container.appendChild(btn);
+        }
+      });
+    }
+
+    function filterByLetter(letter) {
+      lmLetterFilter = letter;
+      
+      const buttons = document.querySelectorAll('#letter-selector-row button');
+      buttons.forEach(btn => {
+        btn.className = "px-2.5 py-1 text-xs font-semibold rounded-lg transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800";
+      });
+
+      const target = document.getElementById(`letter-btn-${letter}`);
+      if (target) {
+        target.className = "px-2.5 py-1 text-xs font-bold rounded-lg transition-all bg-sky-500 text-white shadow-sm";
+      }
+
+      updateFilterTextLabel();
+      renderVocabList();
+    }
+
+    function filterByChapter(chap) {
+      m1ChapterFilter = chap;
+
+      const buttons = document.querySelectorAll('.chap-btn');
+      buttons.forEach(btn => {
+        btn.className = "chap-btn px-2 py-1.5 rounded-xl text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200";
+      });
+
+      const target = document.getElementById(`chap-btn-${chap}`);
+      if (target) {
+        target.className = "chap-btn px-2 py-1.5 rounded-xl text-xs font-bold transition-all bg-sky-500 text-white shadow-md shadow-sky-500/10";
+      }
+
+      updateFilterTextLabel();
+      renderVocabList();
+    }
+
+    function filterByMarker(marker) {
+      lmMarkerFilter = marker;
+
+      const buttons = document.querySelectorAll('.marker-btn');
+      buttons.forEach(btn => {
+        btn.className = "marker-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-200";
+      });
+
+      const target = document.getElementById(`marker-btn-${marker}`);
+      if (target) {
+        target.className = "marker-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-sky-500 text-white shadow-md shadow-sky-500/10";
+      }
+
+      updateFilterTextLabel();
+      renderVocabList();
+    }
+
+    function updateFilterTextLabel() {
+      const label = document.getElementById('current-filter-label');
+      
+      if (currentLibrary === 'm1') {
+        if (m1ChapterFilter === 'all') {
+          label.textContent = "全部 M1 核心词";
+        } else {
+          label.textContent = `M1 • Ch ${m1ChapterFilter}`;
+        }
+      } else {
+        if (lmMarkerFilter === 'all' && lmLetterFilter === 'all') {
+          label.textContent = "全部 3000 高频";
+        } else {
+          const parts = [];
+          if (lmMarkerFilter !== 'all') parts.push(`频标: ${lmMarkerFilter}`);
+          if (lmLetterFilter !== 'all') parts.push(`首字母: ${lmLetterFilter}`);
+          label.textContent = parts.join(' • ');
+        }
+      }
+    }
+
+    function triggerSearch() {
+      searchQuery = document.getElementById('global-search').value.trim().toLowerCase();
+      renderVocabList();
+    }
+
+    function renderVocabList() {
+      const container = document.getElementById('vocabulary-grid');
+      container.innerHTML = '';
+
+      const activeDataset = getActiveDataset();
+
+      const filtered = activeDataset.filter(item => {
+        // Library custom filters
+        let matchesRange = true;
+        if (currentLibrary === 'm1') {
+          matchesRange = m1ChapterFilter === 'all' || item.chapter === parseInt(m1ChapterFilter);
+        } else {
+          const matchesLetter = lmLetterFilter === 'all' || item.word.toUpperCase().startsWith(lmLetterFilter);
+          let matchesMarker = true;
+          if (lmMarkerFilter !== 'all') {
+            matchesMarker = (item.s === lmMarkerFilter) || (item.w === lmMarkerFilter);
+          }
+          matchesRange = matchesLetter && matchesMarker;
+        }
+
+        const matchesSearch = item.word.toLowerCase().includes(searchQuery) || item.zh.toLowerCase().includes(searchQuery);
+        const matchesStarred = !onlyStarred || starredWords.includes(item.id);
+
+        return matchesRange && matchesSearch && matchesStarred;
+      });
+
+      document.getElementById('word-count-badge').textContent = `${filtered.length} 词`;
+
+      if (filtered.length === 0) {
+        document.getElementById('no-results').classList.remove('hidden');
+        return;
+      } else {
+        document.getElementById('no-results').classList.add('hidden');
+      }
+
+      // Loop generation of active cards
+      filtered.forEach(vocab => {
+        const isStarred = starredWords.includes(vocab.id);
+        const isMastered = learnedWords.includes(vocab.id);
+        const isEbbinghaus = ebbinghausSchedule.some(s => s.wordId === vocab.id);
+
+        // Render frequency or chapter tags
+        let subBadgeHTML = '';
+        if (currentLibrary === 'm1') {
+          subBadgeHTML = `<span class="bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 text-[10px] font-bold px-1.5 py-0.5 rounded-md">Chapter ${vocab.chapter}</span>`;
+        } else {
+          if (vocab.s) subBadgeHTML += `<span class="bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border border-amber-200/50 text-[10px] font-bold px-1.5 py-0.5 rounded-md">Spoken ${vocab.s}</span> `;
+          if (vocab.w) subBadgeHTML += `<span class="bg-sky-50 dark:bg-sky-950/30 text-sky-600 dark:text-sky-400 border border-sky-200/50 text-[10px] font-bold px-1.5 py-0.5 rounded-md">Written ${vocab.w}</span>`;
+        }
+
+        const card = document.createElement('div');
+        card.id = `vocab-card-${vocab.id}`;
+        card.className = `p-5 bg-white dark:bg-slate-950 rounded-3xl border ${isMastered ? 'border-emerald-300 dark:border-emerald-900/40 bg-emerald-50/10' : 'border-slate-200 dark:border-slate-800'} shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300 relative group`;
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-3.5">
+            <div class="flex flex-wrap gap-1">
+              ${subBadgeHTML}
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="toggleEbbinghaus(${vocab.id}, event)" title="${isEbbinghaus ? '已加入艾宾浩斯复习' : '点击加入艾宾浩斯智能抗遗忘曲线'}" class="p-1 hover:scale-110 transition-transform">
+                <i class="fa-solid fa-brain text-xs ${isEbbinghaus ? 'text-indigo-500 animate-pulse' : 'text-slate-300 dark:text-slate-700 hover:text-indigo-400'}"></i>
+              </button>
+              <button onclick="toggleStarStatus(${vocab.id}, event)" class="p-1 hover:scale-110 transition-transform">
+                <i class="${isStarred ? 'fa-solid' : 'fa-regular'} fa-star text-amber-500 text-xs" id="star-icon-${vocab.id}"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-3 my-1">
+            <div class="flex items-start gap-4">
+              <!-- SVG Visual Memory Cue -->
+              <div class="w-14 h-14 bg-sky-50 dark:bg-sky-950/30 border border-sky-100/50 dark:border-sky-900/20 text-sky-500 rounded-2xl flex items-center justify-center text-2xl shrink-0 cursor-pointer shadow-inner" onclick="playAudio('${vocab.word}')" title="点击单词发音">
+                <i class="fa-solid ${vocab.img || 'fa-cubes'}"></i>
+              </div>
+
+              <div class="space-y-0.5 cursor-pointer flex-1 min-w-0" onclick="playBilingualAudio('${vocab.word}', '${vocab.zh}')" title="点击中英连续朗读">
+                <h3 class="font-black text-lg tracking-tight hover:text-sky-500 transition-colors flex items-center gap-1.5">
+                  <span class="truncate">${vocab.word}</span>
+                  <span class="text-xs text-slate-400 group-hover:inline-block hidden"><i class="fa-solid fa-volume-high"></i></span>
+                </h3>
+                <p class="text-xs font-serif text-slate-400 dark:text-slate-500">${vocab.phonetic}</p>
+                <div class="flex items-center gap-1.5 pt-0.5">
+                  <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 bg-slate-50 dark:bg-slate-900 px-1 py-0.5 rounded">${vocab.pos}</span>
+                  <p class="font-extrabold text-sm text-slate-700 dark:text-slate-300 truncate">${vocab.zh}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active learning: Collocations & Example sentence -->
+            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-3 space-y-2 text-xs border border-slate-100 dark:border-slate-900/30">
+              <div class="space-y-0.5">
+                <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600 dark:text-sky-400 block">高频搭配 Collocation</span>
+                <p class="font-bold text-slate-700 dark:text-slate-300">${vocab.collocations[0]}</p>
+              </div>
+              <div class="space-y-0.5 border-t border-slate-100 dark:border-slate-900/50 pt-1.5 cursor-pointer" onclick="playAudio('${vocab.example_en.replace(/'/g, "\\'")}')" title="点击例句英文朗读">
+                <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600 dark:text-sky-400 block flex items-center gap-1">
+                  <span>语境例句 Sentence</span>
+                  <i class="fa-solid fa-volume-high text-[8px] text-slate-400"></i>
+                </span>
+                <p class="font-semibold text-slate-600 dark:text-slate-400 leading-snug italic">${vocab.example_en}</p>
+                <p class="text-slate-500 dark:text-slate-500 mt-0.5">${vocab.example_zh}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between border-t border-slate-100 dark:border-slate-900 pt-3 mt-3.5">
+            <span class="text-[9px] text-slate-400 font-semibold uppercase tracking-widest">Mastery ID: #${vocab.id}</span>
+            <button onclick="toggleLearnStatus(${vocab.id})" id="learn-btn-${vocab.id}" class="text-sm p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors flex items-center gap-1 font-semibold text-xs">
+              ${isMastered 
+                ? `<i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>` 
+                : `<i class="fa-regular fa-circle text-slate-300 dark:text-slate-700 text-lg"></i>`
+              }
+            </button>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // --- ==================== SCREEN 2: EBBINGHAUS ENGINE ==================== ---
+    function toggleEbbinghaus(wordId, event) {
+      if (event) event.stopPropagation();
+      const idx = ebbinghausSchedule.findIndex(s => s.wordId === wordId);
+
+      if (idx > -1) {
+        openConfirmModal("移除追踪", "确定要将该高频词从艾宾浩斯复习计划中移出吗？", () => {
+          ebbinghausSchedule.splice(idx, 1);
+          saveActiveProgressData();
+          updateProgressUI();
+          renderVocabList();
+          if (currentTab === 'ebbinghaus') renderEbbinghausScreen();
+          showToast("已成功移出复习追踪队列");
+        });
+      } else {
+        const now = Date.now();
+        ebbinghausSchedule.push({
+          wordId: wordId,
+          level: 1,
+          nextReviewTime: now + ebbinghausIntervals[1],
+          lastActionTime: now
+        });
+        saveActiveProgressData();
+        updateProgressUI();
+        renderVocabList();
+        if (currentTab === 'ebbinghaus') renderEbbinghausScreen();
+        showToast("🧠 成功开启艾宾浩斯！首次复习将在 20分钟 后开启！");
+      }
+    }
+
+    function timeWarp20Mins() {
+      const offset = 20 * 60 * 1000;
+      ebbinghausSchedule.forEach(s => {
+        if (s.level <= 7) {
+          s.nextReviewTime -= offset;
+        }
+      });
+      saveActiveProgressData();
+      showToast("🕒 模拟时间流逝 20分钟！到期的单词现在可以进行复习。");
+      renderEbbinghausScreen();
+      updateProgressUI();
+    }
+
+    function renderEbbinghausScreen() {
+      const now = Date.now();
+      const trackingList = ebbinghausSchedule.filter(s => s.level <= 7);
+      const dueList = trackingList.filter(s => s.nextReviewTime <= now);
+      const fullyMasteredList = ebbinghausSchedule.filter(s => s.level > 7);
+
+      document.getElementById('ebg-tracking-count').textContent = trackingList.length;
+      document.getElementById('ebg-due-count').textContent = dueList.length;
+      document.getElementById('ebg-mastered-count').textContent = fullyMasteredList.length;
+
+      const activePanel = document.getElementById('ebbinghaus-active-panel');
+      const activeDataset = getActiveDataset();
+
+      if (dueList.length === 0) {
+        activePanel.innerHTML = `
+          <div class="py-12 text-center text-slate-500 space-y-4">
+            <div class="w-16 h-16 bg-sky-50 dark:bg-sky-950/40 text-sky-500 rounded-full flex items-center justify-center text-2xl mx-auto">
+              <i class="fa-solid fa-cloud-sun"></i>
+            </div>
+            <div class="space-y-1 max-w-md mx-auto">
+              <h3 class="font-extrabold text-base text-slate-800 dark:text-white">目前没有到期复习的单词</h3>
+              <p class="text-xs text-slate-400">
+                请先在“主动词汇库”中点击词卡上的 **大脑 🧠 按钮** 开启跟踪。或使用右上方调试，加速模拟流逝 20分钟。
+              </p>
+            </div>
+          </div>
+        `;
+      } else {
+        const task = dueList[0];
+        const vocab = activeDataset.find(v => v.id === task.wordId);
+
+        if (!vocab) {
+          // Fallback safe remove if word dataset missing
+          const idx = ebbinghausSchedule.findIndex(s => s.wordId === task.wordId);
+          if (idx > -1) ebbinghausSchedule.splice(idx, 1);
+          saveActiveProgressData();
+          return;
+        }
+
+        activePanel.innerHTML = `
+          <div class="space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <span class="px-2.5 py-1 bg-orange-100 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 text-[10px] font-bold rounded-lg uppercase tracking-wider flex items-center gap-1 animate-pulse">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                到期复习中 (艾宾浩斯等级 ${task.level} / 7)
+              </span>
+              <span class="text-xs text-slate-400 font-medium">剩余待完成：<strong>${dueList.length}</strong> 词</span>
+            </div>
+
+            <div class="text-center py-4 space-y-4">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">请尝试在脑海中回忆它的中文及搭配</span>
+              
+              <div class="space-y-1.5">
+                <h1 class="text-4xl font-black tracking-tight text-sky-600 dark:text-sky-400">${vocab.word}</h1>
+                <p class="text-xs font-serif text-slate-400 font-semibold">${vocab.phonetic}</p>
+              </div>
+
+              <div id="ebg-reveal-panel" class="hidden p-5 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 space-y-4 text-left max-w-md mx-auto">
+                <div class="text-center pb-2.5 border-b border-slate-200/50 dark:border-slate-800">
+                  <span class="text-[9px] font-black uppercase bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 px-2 py-0.5 rounded">${vocab.pos}</span>
+                  <p class="text-xl font-black text-slate-800 dark:text-white mt-1.5">${vocab.zh}</p>
+                </div>
+
+                <div class="space-y-2 text-xs">
+                  <div>
+                    <span class="text-[10px] text-sky-500 font-extrabold uppercase tracking-wide">常用搭配:</span>
+                    <p class="font-bold text-slate-700 dark:text-slate-300">${vocab.collocations.join(', ')}</p>
+                  </div>
+                  <div>
+                    <span class="text-[10px] text-sky-500 font-extrabold uppercase tracking-wide">真实例句:</span>
+                    <p class="font-semibold text-slate-600 dark:text-slate-400 italic">${vocab.example_en}</p>
+                    <p class="text-slate-500 mt-0.5">${vocab.example_zh}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-3 flex justify-center gap-3">
+                <button onclick="revealEbgAnswer()" id="ebg-reveal-btn" class="px-6 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-sky-500/10 flex items-center gap-1.5 mx-auto">
+                  <i class="fa-solid fa-eye"></i>
+                  <span>显示词义及搭配进行判定</span>
+                </button>
+
+                <div id="ebg-grade-panel" class="hidden justify-center gap-3 w-full">
+                  <button onclick="gradeEbgTask(${task.wordId}, false)" class="flex-1 max-w-[200px] py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl text-xs shadow-lg shadow-rose-500/10 flex items-center justify-center gap-1.5">
+                    <i class="fa-regular fa-circle-xmark"></i>
+                    <span>记不清了 (退回第1阶)</span>
+                  </button>
+                  <button onclick="gradeEbgTask(${task.wordId}, true)" class="flex-1 max-w-[200px] py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs shadow-lg shadow-emerald-500/10 flex items-center justify-center gap-1.5">
+                    <i class="fa-regular fa-circle-check"></i>
+                    <span>完全记得 (升入下一阶)</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Pronounce when rendering a task
+        playAudio(vocab.word);
+      }
+
+      // Populate Ebbinghaus list rows
+      const tbody = document.getElementById('ebbinghaus-schedule-tbody');
+      tbody.innerHTML = '';
+
+      if (ebbinghausSchedule.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-8 text-center text-xs text-slate-400">目前没有任何单词处于复习跟踪中。</td>
+          </tr>
+        `;
+        return;
+      }
+
+      ebbinghausSchedule.forEach(s => {
+        const itemObj = activeDataset.find(v => v.id === s.wordId);
+        if (!itemObj) return;
+
+        let levelBadge = '';
+        if (s.level > 7) {
+          levelBadge = `<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 font-black text-[10px]">终极巩固 🏆</span>`;
+        } else {
+          levelBadge = `<span class="px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400 font-bold text-[10px]">阶段 ${s.level} / 7</span>`;
+        }
+
+        let timeStr = '';
+        if (s.level > 7) {
+          timeStr = `<span class="text-emerald-500 font-extrabold">永久固化</span>`;
+        } else {
+          const diff = s.nextReviewTime - now;
+          if (diff <= 0) {
+            timeStr = `<span class="text-orange-500 font-extrabold animate-pulse"><i class="fa-solid fa-circle-exclamation"></i> 现已到期</span>`;
+          } else {
+            const mins = Math.ceil(diff / (60 * 1000));
+            if (mins < 60) {
+              timeStr = `${mins} 分钟后`;
+            } else {
+              const hrs = Math.ceil(mins / 60);
+              if (hrs < 24) {
+                timeStr = `${hrs} 小时后`;
+              } else {
+                timeStr = `${Math.ceil(hrs / 24)} 天后`;
+              }
+            }
+          }
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors";
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-bold text-slate-800 dark:text-white">${itemObj.word}</td>
+          <td class="py-3 px-4 text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px]">${itemObj.zh}</td>
+          <td class="py-3 px-4 text-center">${levelBadge}</td>
+          <td class="py-3 px-4 text-slate-500 dark:text-slate-400 font-semibold">${timeStr}</td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="toggleEbbinghaus(${s.wordId}, event)" class="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-all text-xs" title="删除">
+              <i class="fa-regular fa-trash-can"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function revealEbgAnswer() {
+      document.getElementById('ebg-reveal-panel').classList.remove('hidden');
+      document.getElementById('ebg-reveal-btn').classList.add('hidden');
+      document.getElementById('ebg-grade-panel').classList.remove('hidden');
+      document.getElementById('ebg-grade-panel').classList.add('flex');
+    }
+
+    function gradeEbgTask(wordId, isSuccess) {
+      const task = ebbinghausSchedule.find(s => s.wordId === wordId);
+      const now = Date.now();
+
+      if (isSuccess) {
+        task.level += 1;
+        if (task.level > 7) {
+          showToast("🎉 恭喜！该高频词已通过7轮记忆复习，正式写入大脑永久记忆！");
+        } else {
+          task.nextReviewTime = now + ebbinghausIntervals[task.level];
+          showToast(`👍 记忆正确！已成功升入第 ${task.level} 记忆阶段。`);
+        }
+      } else {
+        task.level = 1;
+        task.nextReviewTime = now + ebbinghausIntervals[1];
+        showToast("⚠️ 已重置为第 1 阶段（20分钟后再次复习），多巩固两次吧！", false);
+      }
+
+      task.lastActionTime = now;
+      saveActiveProgressData();
+      updateProgressUI();
+      renderEbbinghausScreen();
+    }
+
+    // --- ==================== SCREEN 3: 3D FLASHCARDS ENGINE ==================== ---
+    function initFlashcardDeck() {
+      const deck = getFilteredDeck();
+      if (deck.length === 0) {
+        showToast("该词汇范围筛选下没有任何卡片，请换个筛选项", false);
+        switchTab('list');
+        return;
+      }
+
+      if (activeCardIndex >= deck.length) {
+        activeCardIndex = 0;
+      }
+
+      cardIsFlipped = false;
+      document.getElementById('flashcard-obj').classList.remove('rotate-y-180');
+      renderActiveCard();
+    }
+
+    function getFilteredDeck() {
+      const dataset = getActiveDataset();
+      return dataset.filter(item => {
+        let matchesRange = true;
+        if (currentLibrary === 'm1') {
+          matchesRange = m1ChapterFilter === 'all' || item.chapter === parseInt(m1ChapterFilter);
+        } else {
+          const matchesLetter = lmLetterFilter === 'all' || item.word.toUpperCase().startsWith(lmLetterFilter);
+          let matchesMarker = true;
+          if (lmMarkerFilter !== 'all') {
+            matchesMarker = (item.s === lmMarkerFilter) || (item.w === lmMarkerFilter);
+          }
+          matchesRange = matchesLetter && matchesMarker;
+        }
+
+        const matchesStarred = !onlyStarred || starredWords.includes(item.id);
+        return matchesRange && matchesStarred;
+      });
+    }
+
+    function renderActiveCard() {
+      const deck = getFilteredDeck();
+      const vocab = deck[activeCardIndex];
+
+      document.getElementById('card-progress-counter').textContent = `卡片 ${activeCardIndex + 1} / ${deck.length}`;
+
+      // Bind Visual values
+      document.getElementById('card-word').textContent = vocab.word;
+      document.getElementById('card-word-mini').textContent = vocab.word;
+      document.getElementById('card-phonetic').textContent = vocab.phonetic;
+      document.getElementById('card-pos').textContent = vocab.pos;
+      document.getElementById('card-pos-back').textContent = vocab.pos;
+      document.getElementById('card-zh').textContent = vocab.zh;
+
+      // Update Visual Anchors Icon
+      const visualBox = document.getElementById('card-visual-anchor');
+      visualBox.innerHTML = `<i class="fa-solid ${vocab.img || 'fa-cubes'}"></i>`;
+
+      // Set collocations and examples
+      document.getElementById('card-collocation-text').innerHTML = vocab.collocations.join('<br>');
+      document.getElementById('card-example-en').textContent = vocab.example_en;
+      document.getElementById('card-example-zh').textContent = vocab.example_zh;
+
+      // Render Dynamic Markers
+      const markersBox = document.getElementById('card-front-markers');
+      markersBox.innerHTML = '';
+      if (currentLibrary === 'm1') {
+        markersBox.innerHTML += `<span class="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 text-[10px] font-black rounded-lg">M1 Ch ${vocab.chapter}</span>`;
+      } else {
+        if (vocab.s) markersBox.innerHTML += `<span class="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/40 text-amber-600 text-[10px] font-black rounded-lg">Spoken ${vocab.s}</span>`;
+        if (vocab.w) markersBox.innerHTML += `<span class="px-2 py-0.5 bg-sky-50 dark:bg-sky-950/40 text-sky-600 text-[10px] font-black rounded-lg">Written ${vocab.w}</span>`;
+      }
+
+      // Star updates
+      const isStarred = starredWords.includes(vocab.id);
+      const starIcon = document.getElementById('card-star-icon');
+      if (isStarred) {
+        starIcon.className = "fa-solid fa-star text-amber-500 text-base";
+      } else {
+        starIcon.className = "fa-solid fa-star text-slate-300 hover:text-amber-500 text-base";
+      }
+
+      // Mastery buttons styling
+      const isMastered = learnedWords.includes(vocab.id);
+      const unlearnedBtn = document.getElementById('card-unlearned-btn');
+      const learnedBtn = document.getElementById('card-learned-btn');
+
+      if (isMastered) {
+        learnedBtn.className = "flex-1 sm:flex-none px-4 py-3 rounded-xl border border-emerald-500 text-white bg-emerald-500 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/10";
+        unlearnedBtn.className = "flex-1 sm:flex-none px-4 py-3 rounded-xl border border-rose-200 dark:border-rose-900 text-rose-600 bg-rose-50 dark:bg-rose-950/20 text-xs font-bold flex items-center justify-center gap-2 hover:bg-rose-100 transition-all";
+      } else {
+        learnedBtn.className = "flex-1 sm:flex-none px-4 py-3 rounded-xl border border-emerald-200 dark:border-emerald-900 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-100 transition-all";
+        unlearnedBtn.className = "flex-1 sm:flex-none px-4 py-3 rounded-xl border border-rose-500 text-white bg-rose-500 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-rose-500/10";
+      }
+    }
+
+    function flipActiveCard() {
+      const cardObj = document.getElementById('flashcard-obj');
+      cardIsFlipped = !cardIsFlipped;
+      if (cardIsFlipped) {
+        cardObj.classList.add('rotate-y-180');
+      } else {
+        cardObj.classList.remove('rotate-y-180');
+      }
+    }
+
+    function navigateCard(direction) {
+      event.stopPropagation();
+      const deck = getFilteredDeck();
+
+      activeCardIndex += direction;
+      if (activeCardIndex >= deck.length) {
+        activeCardIndex = 0;
+      } else if (activeCardIndex < 0) {
+        activeCardIndex = deck.length - 1;
+      }
+
+      if (cardIsFlipped) {
+        flipActiveCard();
+        setTimeout(() => {
+          renderActiveCard();
+          speakCard();
+        }, 200);
+      } else {
+        renderActiveCard();
+        speakCard();
+      }
+    }
+
+    function speakCard() {
+      if (event) event.stopPropagation();
+      const deck = getFilteredDeck();
+      const vocab = deck[activeCardIndex];
+      playAudio(vocab.word);
+    }
+
+    function toggleStarActiveCard(event) {
+      event.stopPropagation();
+      const deck = getFilteredDeck();
+      const vocab = deck[activeCardIndex];
+      toggleStarStatus(vocab.id);
+      renderActiveCard();
+    }
+
+    function markActiveCardLearned(status) {
+      event.stopPropagation();
+      const deck = getFilteredDeck();
+      const vocab = deck[activeCardIndex];
+
+      const isMastered = learnedWords.includes(vocab.id);
+      if (status && !isMastered) {
+        toggleLearnStatus(vocab.id);
+      } else if (!status && isMastered) {
+        toggleLearnStatus(vocab.id);
+      }
+
+      renderActiveCard();
+    }
+
+    // --- ==================== SCREEN 4: INTERACTIVE QUIZ ==================== ---
+    function populateQuizSetup() {
+      setQuizNum(10);
+
+      const rangeSelect = document.getElementById('quiz-range-select');
+      rangeSelect.innerHTML = '';
+
+      if (currentLibrary === 'm1') {
+        rangeSelect.innerHTML += `<option value="all">所有力学核心词汇（全套 155 个）</option>`;
+        for (let i = 1; i <= 8; i++) {
+          rangeSelect.innerHTML += `<option value="${i}">仅 Chapter ${i} - ${m1Chapters[i]}</option>`;
+        }
+      } else {
+        rangeSelect.innerHTML += `
+          <option value="all">所有高频核心词汇（全套 60 个）</option>
+          <option value="S1">仅口语最核心词汇 (S1)</option>
+          <option value="W1">仅书面最核心词汇 (W1)</option>
+        `;
+      }
+    }
+
+    function setQuizNum(num) {
+      quizTotalNum = num;
+      const buttons = document.querySelectorAll('.quiz-num-btn');
+      buttons.forEach(btn => {
+        btn.className = "quiz-num-btn py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold hover:bg-slate-50";
+      });
+
+      const selected = document.getElementById(`quiz-num-${num}`);
+      if (selected) {
+        selected.className = "quiz-num-btn py-2.5 rounded-xl border border-sky-500 bg-sky-50 dark:bg-sky-950/20 text-sky-600 dark:text-sky-400 text-xs font-bold";
+      }
+    }
+
+    function startQuiz() {
+      quizSelectedRange = document.getElementById('quiz-range-select').value;
+      const activeDataset = getActiveDataset();
+
+      const pool = activeDataset.filter(item => {
+        if (quizSelectedRange === 'all') return true;
+        if (currentLibrary === 'm1') {
+          return item.chapter === parseInt(quizSelectedRange);
+        } else {
+          return (item.s === quizSelectedRange) || (item.w === quizSelectedRange);
+        }
+      });
+
+      if (pool.length < 4) {
+        showToast("该选择范围内的词汇量不足，请重新选择！", false);
+        return;
+      }
+
+      quizQuestions = [];
+      const shuffledPool = [...pool].sort(() => 0.5 - Math.random());
+      const selectedSize = Math.min(quizTotalNum, shuffledPool.length);
+
+      for (let i = 0; i < selectedSize; i++) {
+        const questionWord = shuffledPool[i];
+
+        // Pick 3 wrong answers as distractors
+        const wrongAnswers = activeDataset
+          .filter(v => v.id !== questionWord.id)
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 3)
+          .map(v => v.word);
+
+        const optionsList = [questionWord.word, ...wrongAnswers].sort(() => 0.5 - Math.random());
+
+        quizQuestions.push({
+          word: questionWord,
+          options: optionsList,
+          correctAnswer: questionWord.word
+        });
+      }
+
+      currentQuizIndex = 0;
+      quizScore = 0;
+
+      document.getElementById('quiz-setup').classList.add('hidden');
+      document.getElementById('quiz-result').classList.add('hidden');
+      document.getElementById('quiz-running').classList.remove('hidden');
+
+      renderQuizQuestion();
+    }
+
+    function renderQuizQuestion() {
+      const activeQ = quizQuestions[currentQuizIndex];
+
+      document.getElementById('quiz-progress-text').textContent = `第 ${currentQuizIndex + 1} / ${quizQuestions.length} 题`;
+      document.getElementById('quiz-score').textContent = quizScore;
+      document.getElementById('quiz-question-title').innerHTML = `
+        <span class="text-xs uppercase tracking-widest text-slate-400 font-extrabold block mb-1">“${activeQ.word.zh}”</span>
+        <span>搭配: ${activeQ.word.collocations[0]}</span>
+      `;
+
+      const pct = Math.round((currentQuizIndex / quizQuestions.length) * 100);
+      document.getElementById('quiz-progress-bar').style.width = `${pct}%`;
+
+      document.getElementById('quiz-next-btn').classList.add('hidden');
+
+      const container = document.getElementById('quiz-options-container');
+      container.innerHTML = '';
+
+      activeQ.options.forEach((optText, i) => {
+        const btn = document.createElement('button');
+        btn.id = `quiz-opt-${i}`;
+        btn.className = "w-full p-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-left text-sm font-semibold transition-all hover:bg-slate-50 dark:hover:bg-slate-900 flex items-center justify-between group";
+        btn.onclick = () => selectQuizOption(i, optText);
+        btn.innerHTML = `
+          <span>${optText}</span>
+          <span class="w-6 h-6 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center text-xs group-hover:border-sky-500 text-transparent">
+            <i class="fa-solid fa-check"></i>
+          </span>
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    function speakQuizWord() {
+      const activeQ = quizQuestions[currentQuizIndex];
+      playAudio(activeQ.word.word);
+    }
+
+    function selectQuizOption(index, selectedText) {
+      const activeQ = quizQuestions[currentQuizIndex];
+      const nextBtn = document.getElementById('quiz-next-btn');
+
+      const optionsButtons = document.querySelectorAll('#quiz-options-container button');
+      optionsButtons.forEach(btn => {
+        btn.disabled = true;
+      });
+
+      const chosenBtn = document.getElementById(`quiz-opt-${index}`);
+      const isCorrect = selectedText === activeQ.correctAnswer;
+
+      if (isCorrect) {
+        quizScore++;
+        document.getElementById('quiz-score').textContent = quizScore;
+        chosenBtn.className = "w-full p-4 border border-emerald-500 bg-emerald-50/20 text-emerald-600 dark:text-emerald-400 rounded-2xl text-left text-sm font-bold flex items-center justify-between transition-all";
+        chosenBtn.querySelector('span:last-child').className = "w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs";
+        
+        playAudio(activeQ.correctAnswer);
+      } else {
+        chosenBtn.className = "w-full p-4 border border-rose-500 bg-rose-50/20 text-rose-600 dark:text-rose-400 rounded-2xl text-left text-sm font-bold flex items-center justify-between transition-all";
+        chosenBtn.querySelector('span:last-child').className = "w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs";
+        chosenBtn.querySelector('span:last-child').innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+
+        // Highlight correct options
+        optionsButtons.forEach((btn, i) => {
+          if (activeQ.options[i] === activeQ.correctAnswer) {
+            btn.className = "w-full p-4 border border-emerald-500 bg-emerald-50/20 text-emerald-600 dark:text-emerald-400 rounded-2xl text-left text-sm font-bold flex items-center justify-between transition-all";
+            btn.querySelector('span:last-child').className = "w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs";
+          }
+        });
+      }
+
+      nextBtn.classList.remove('hidden');
+    }
+
+    function nextQuizQuestion() {
+      currentQuizIndex++;
+      if (currentQuizIndex < quizQuestions.length) {
+        renderQuizQuestion();
+      } else {
+        showQuizResults();
+      }
+    }
+
+    function showQuizResults() {
+      document.getElementById('quiz-running').classList.add('hidden');
+      document.getElementById('quiz-result').classList.remove('hidden');
+
+      const pct = Math.round((quizScore / quizQuestions.length) * 100);
+
+      document.getElementById('quiz-res-total').textContent = quizQuestions.length;
+      document.getElementById('quiz-res-correct').textContent = quizScore;
+      document.getElementById('quiz-result-subtitle').textContent = `答对 ${quizScore} 题，正确率 ${pct}%`;
+
+      const title = document.getElementById('quiz-result-title');
+      const emoji = document.getElementById('quiz-result-emoji');
+      if (pct === 100) {
+        title.textContent = "太神奇了！完美通关自测！🏆";
+        emoji.textContent = "🏆";
+      } else if (pct >= 80) {
+        title.textContent = "干得漂亮！再接再厉！✨";
+        emoji.textContent = "✨";
+      } else if (pct >= 60) {
+        title.textContent = "做得很好，部分词汇需要多强化。👍";
+        emoji.textContent = "👍";
+      } else {
+        title.textContent = "别气馁！多刷刷3D卡片重新挑战吧。💪";
+        emoji.textContent = "💪";
+      }
+    }
+
+    function resetQuiz() {
+      document.getElementById('quiz-running').classList.add('hidden');
+      document.getElementById('quiz-result').classList.add('hidden');
+      document.getElementById('quiz-setup').classList.remove('hidden');
+    }
+
+    // --- KEYBOARD SHORTCUTS ---
+    function setupKeyboardShortcuts() {
+      document.addEventListener('keydown', function(event) {
+        if (currentTab !== 'flashcard') return;
+
+        if (event.code === 'Space') {
+          event.preventDefault();
+          flipActiveCard();
+        } else if (event.code === 'ArrowLeft') {
+          navigateCard(-1);
+        } else if (event.code === 'ArrowRight') {
+          navigateCard(1);
+        } else if (event.code === 'KeyV') {
+          speakCard();
+        }
+      });
+    }
+
+    // --- NAVIGATION TABS CONTROLLER ---
+    function switchTab(tabName) {
+      currentTab = tabName;
+
+      document.getElementById('screen-list').classList.add('hidden');
+      document.getElementById('screen-ebbinghaus').classList.add('hidden');
+      document.getElementById('screen-flashcard').classList.add('hidden');
+      document.getElementById('screen-quiz').classList.add('hidden');
+      document.getElementById('screen-stats').classList.add('hidden');
+
+      const buttons = document.querySelectorAll('#nav-tabs button');
+      buttons.forEach(btn => {
+        btn.className = "w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all-300 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900";
+      });
+
+      document.getElementById(`screen-${tabName}`).classList.remove('hidden');
+      const target = document.getElementById(`tab-${tabName}`);
+      if (target) {
+        target.className = "w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all-300 bg-brand-500 text-white shadow-md shadow-brand-500/10";
+      }
+
+      if (tabName === 'list') {
+        renderVocabList();
+      } else if (tabName === 'ebbinghaus') {
+        renderEbbinghausScreen();
+      } else if (tabName === 'flashcard') {
+        initFlashcardDeck();
+      } else if (tabName === 'quiz') {
+        resetQuiz();
+      } else if (tabName === 'stats') {
+        updateProgressUI();
+      }
+    }
+
+    // --- PROGRESS CONTROLLER CORE IMPLEMENTATIONS ---
+    function toggleLearnStatus(wordId) {
+      const idx = learnedWords.indexOf(wordId);
+      if (idx > -1) {
+        learnedWords.splice(idx, 1);
+        showToast("已移出已掌握，需多加巩固");
+      } else {
+        learnedWords.push(wordId);
+        showToast("🎉 已掌握词汇！太棒了！");
+      }
+
+      saveActiveProgressData();
+      updateProgressUI();
+
+      const btn = document.getElementById(`learn-btn-${wordId}`);
+      const card = document.getElementById(`vocab-card-${wordId}`);
+      if (btn && card) {
+        if (learnedWords.includes(wordId)) {
+          btn.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>`;
+          card.classList.add('border-emerald-300', 'dark:border-emerald-900/40', 'bg-emerald-50/10');
+        } else {
+          btn.innerHTML = `<i class="fa-regular fa-circle text-slate-300 dark:text-slate-700 text-lg"></i>`;
+          card.classList.remove('border-emerald-300', 'dark:border-emerald-900/40', 'bg-emerald-50/10');
+        }
+      }
+    }
+
+    function toggleStarStatus(wordId, event) {
+      if (event) event.stopPropagation();
+      const idx = starredWords.indexOf(wordId);
+      if (idx > -1) {
+        starredWords.splice(idx, 1);
+        showToast("已移出收藏夹");
+      } else {
+        starredWords.push(wordId);
+        showToast("⭐️ 已加入收藏重点跟进！");
+      }
+
+      saveActiveProgressData();
+      updateProgressUI();
+
+      const starIcon = document.getElementById(`star-icon-${wordId}`);
+      if (starIcon) {
+        if (starredWords.includes(wordId)) {
+          starIcon.className = "fa-solid fa-star text-amber-500 text-xs";
+        } else {
+          starIcon.className = "fa-regular fa-star text-slate-300 dark:text-slate-700 text-xs";
+        }
+      }
+
+      if (onlyStarred) renderVocabList();
+    }
+
+    function triggerResetProgressPrompt() {
+      const libLabel = currentLibrary === 'm1' ? "Edexcel M1 机械力学" : "Longman 3000 高频";
+      openConfirmModal(
+        "确定要清空进度吗？", 
+        `🚨 警告！这将会清空您当前所选【${libLabel}】词库的所有卡片掌握进度、收藏状态以及艾宾浩斯曲线跟踪记录。此操作无法撤消。确定吗？`, 
+        () => {
+          starredWords = [];
+          learnedWords = [];
+          ebbinghausSchedule = [];
+          saveActiveProgressData();
+          
+          updateProgressUI();
+          renderVocabList();
+          if (currentTab === 'ebbinghaus') renderEbbinghausScreen();
+          showToast("该词库历史记录已彻底清除成功！");
+        }
+      );
+    }
+
+  </script>
+</body>
+</html>
